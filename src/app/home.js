@@ -179,8 +179,14 @@ export default function Home() {
           <Text>Categorias</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity>
-          <Ionicons name="menu" size={25} color="#222" />
+        <TouchableOpacity
+          onPress={() => router.push('/mais')}
+        >
+          <Ionicons
+            name="menu"
+            size={25}
+            color="#222"
+          />
           <Text>Mais</Text>
         </TouchableOpacity>
 
