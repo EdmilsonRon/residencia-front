@@ -1,250 +1,300 @@
+import React from 'react';
+
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
   Pressable,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
+const opcoesMenu = [
+  {
+    titulo: 'Início',
+    rota: '/home',
+    icone: 'home-outline',
+  },
+  {
+    titulo: 'Orçamentos',
+    rota: '/orcamentos',
+    icone: 'wallet-outline',
+  },
+  {
+    titulo: 'Metas',
+    rota: '/metas',
+    icone: 'flag-outline',
+  },
+  {
+    titulo: 'Relatórios',
+    rota: '/relatorios',
+    icone: 'bar-chart-outline',
+  },
+  {
+    titulo: 'Saúde financeira',
+    rota: '/saude-financeira',
+    icone: 'heart-outline',
+  },
+  {
+    titulo: 'Perfil',
+    rota: '/perfil',
+    icone: 'person-outline',
+  },
+  {
+    titulo: 'Configurações',
+    rota: '/configuracoes',
+    icone: 'settings-outline',
+  },
+];
+
 export default function SideMenu({ visible, onClose }) {
-  if (!visible) {
-    return null;
+  function navegarPara(rota) {
+    onClose();
+    router.navigate(rota);
   }
 
-  function navegar(rota) {
+  function sairDoAplicativo() {
     onClose();
-    router.push(rota);
+
+    // O logout real será implementado futuramente.
+    // Por enquanto, esta função apenas fecha o menu.
   }
 
   return (
-    <View style={styles.overlay}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <View style={estilos.fundoModal}>
+        {/* Área escurecida fora do menu */}
+        <Pressable
+          style={estilos.areaExterna}
+          onPress={onClose}
+        />
 
-      {/* Área escura fora do menu */}
-      <Pressable
-        style={styles.background}
-        onPress={onClose}
-      />
+        {/* Painel lateral */}
+        <View style={estilos.painel}>
+          <View style={estilos.cabecalho}>
+            <View style={estilos.logo}>
+              <Ionicons
+                name="wallet"
+                size={27}
+                color="#FFFFFF"
+              />
+            </View>
 
-      {/* Menu */}
-      <View style={styles.menu}>
+            <View style={estilos.informacoesCabecalho}>
+              <Text style={estilos.tituloAplicativo}>
+                Meu Financeiro
+              </Text>
 
-        {/* Cabeçalho */}
-        <View style={styles.menuHeader}>
+              <Text style={estilos.subtituloAplicativo}>
+                Organize sua vida financeira
+              </Text>
+            </View>
 
-          <View style={styles.profileIcon}>
-            <Ionicons
-              name="person"
-              size={28}
-              color="#222"
-            />
+            <TouchableOpacity
+              onPress={onClose}
+              style={estilos.botaoFechar}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar menu"
+            >
+              <Ionicons
+                name="close"
+                size={24}
+                color="#555555"
+              />
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>
-              Usuário
-            </Text>
+          <View style={estilos.separador} />
 
-            <Text style={styles.profileEmail}>
-              usuario@email.com
-            </Text>
-          </View>
+          <ScrollView
+            style={estilos.lista}
+            showsVerticalScrollIndicator={false}
+          >
+            {opcoesMenu.map((opcao) => (
+              <TouchableOpacity
+                key={opcao.rota}
+                style={estilos.opcao}
+                activeOpacity={0.7}
+                onPress={() => navegarPara(opcao.rota)}
+              >
+                <Ionicons
+                  name={opcao.icone}
+                  size={22}
+                  color="#555555"
+                  style={estilos.iconeOpcao}
+                />
 
-          <TouchableOpacity onPress={onClose}>
+                <Text style={estilos.textoOpcao}>
+                  {opcao.titulo}
+                </Text>
+
+                <Ionicons
+                  name="chevron-forward"
+                  size={17}
+                  color="#BBBBBB"
+                />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <View style={estilos.separador} />
+
+          <TouchableOpacity
+            style={estilos.opcaoSair}
+            activeOpacity={0.7}
+            onPress={sairDoAplicativo}
+          >
             <Ionicons
-              name="close"
-              size={27}
-              color="#222"
+              name="log-out-outline"
+              size={22}
+              color="#D92344"
+              style={estilos.iconeOpcao}
             />
+
+            <Text style={estilos.textoSair}>
+              Sair
+            </Text>
           </TouchableOpacity>
 
+          <Text style={estilos.rodape}>
+            Meu Financeiro
+          </Text>
         </View>
-
-        {/* Separador */}
-        <View style={styles.separator} />
-
-        {/* Usuário */}
-        <MenuItem
-          icon="person-outline"
-          title="Usuário"
-          onPress={() => navegar('/usuario')}
-        />
-
-        {/* Transações */}
-        <MenuItem
-          icon="swap-horizontal-outline"
-          title="Transações"
-          onPress={() => navegar('/transacoes')}
-        />
-
-        {/* Categorias */}
-        <MenuItem
-          icon="grid-outline"
-          title="Categorias"
-          onPress={() => navegar('/categorias')}
-        />
-
-        {/* Orçamentos */}
-        <MenuItem
-          icon="wallet-outline"
-          title="Orçamentos"
-          onPress={() => navegar('/orcamentos')}
-        />
-
-        {/* Metas */}
-        <MenuItem
-          icon="flag-outline"
-          title="Metas"
-          onPress={() => navegar('/metas')}
-        />
-
-        {/* Relatórios */}
-        <MenuItem
-          icon="bar-chart-outline"
-          title="Relatórios"
-          onPress={() => navegar('/relatorios')}
-        />
-
-        {/* Saúde Financeira */}
-        <MenuItem
-          icon="heart-outline"
-          title="Saúde Financeira"
-          onPress={() => navegar('/saude-financeira')}
-        />
-
-        <View style={styles.separator} />
-
-        {/* Voltar para Home */}
-        <MenuItem
-          icon="home-outline"
-          title="Início"
-          onPress={() => navegar('/home')}
-        />
-
       </View>
-
-    </View>
+    </Modal>
   );
 }
 
-
-/* Item reutilizável do menu */
-function MenuItem({ icon, title, onPress }) {
-  return (
-    <TouchableOpacity
-      style={styles.menuItem}
-      onPress={onPress}
-    >
-
-      <Ionicons
-        name={icon}
-        size={24}
-        color="#222"
-      />
-
-      <Text style={styles.menuItemText}>
-        {title}
-      </Text>
-
-      <Ionicons
-        name="chevron-forward"
-        size={18}
-        color="#777"
-      />
-
-    </TouchableOpacity>
-  );
-}
-
-
-const styles = StyleSheet.create({
-
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 100,
-    flexDirection: 'row',
-  },
-
-  background: {
+const estilos = StyleSheet.create({
+  fundoModal: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
 
-  menu: {
-    width: '78%',
-    height: '100%',
-    backgroundColor: '#B18768',
-    paddingTop: 55,
-    paddingHorizontal: 18,
+  areaExterna: {
+    flex: 1,
+  },
 
-    shadowColor: '#000',
+  painel: {
+    width: 300,
+    maxWidth: '88%',
+    height: '100%',
+    backgroundColor: '#FFFFFF',
+    paddingTop: 55,
+    paddingBottom: 25,
+    elevation: 10,
+    shadowColor: '#000000',
     shadowOffset: {
-      width: 3,
+      width: -3,
       height: 0,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 5,
-
-    elevation: 10,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
 
-  menuHeader: {
+  cabecalho: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: 18,
+    paddingHorizontal: 18,
+    paddingBottom: 24,
   },
 
-  profileIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 2,
-    borderColor: '#222',
+  logo: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: '#D92344',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  profileInfo: {
+  informacoesCabecalho: {
     flex: 1,
     marginLeft: 12,
   },
 
-  profileName: {
+  tituloAplicativo: {
     fontSize: 17,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    color: '#222222',
   },
 
-  profileEmail: {
-    fontSize: 10,
-    marginTop: 3,
-    color: '#555',
+  subtituloAplicativo: {
+    fontSize: 11,
+    color: '#777777',
+    marginTop: 5,
   },
 
-  separator: {
+  botaoFechar: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
+  },
+
+  separador: {
     height: 1,
-    backgroundColor: '#80634E',
-    marginVertical: 8,
+    backgroundColor: '#EEEEEE',
+    marginHorizontal: 18,
   },
 
-  menuItem: {
-    height: 55,
+  lista: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingTop: 15,
+  },
+
+  opcao: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 8,
-    paddingHorizontal: 8,
+    minHeight: 50,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    marginBottom: 5,
   },
 
-  menuItemText: {
+  iconeOpcao: {
+    width: 28,
+    marginRight: 10,
+  },
+
+  textoOpcao: {
     flex: 1,
-    marginLeft: 13,
-    fontSize: 15,
+    fontSize: 14,
+    color: '#333333',
     fontWeight: '500',
   },
 
+  opcaoSair: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 52,
+    paddingHorizontal: 24,
+    marginTop: 8,
+  },
+
+  textoSair: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#D92344',
+  },
+
+  rodape: {
+    textAlign: 'center',
+    fontSize: 11,
+    color: '#AAAAAA',
+    marginTop: 15,
+  },
 });

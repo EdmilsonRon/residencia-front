@@ -1,309 +1,333 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [lembrar, setLembrar] = useState(false);
+
+  function entrar() {
+    // A autenticação real será implementada posteriormente.
+    // Por enquanto, permite acessar a área financeira.
+    router.replace('/home');
+  }
+
+  function abrirCadastro() {
+    router.push('/cadastro');
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+    <KeyboardAvoidingView
+      style={estilos.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <StatusBar style="dark" />
 
-        {/* Logo */}
-        <View style={styles.logoArea}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoText}>B</Text>
+      <ScrollView
+        contentContainerStyle={estilos.conteudo}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Identidade visual */}
+        <View style={estilos.cabecalho}>
+          <View style={estilos.logo}>
+            <Ionicons
+              name="wallet"
+              size={36}
+              color="#FFFFFF"
+            />
           </View>
 
-          <Text style={styles.welcome}>
-            BEM VINDO
+          <Text style={estilos.nomeAplicativo}>
+            Meu Financeiro
+          </Text>
+
+          <Text style={estilos.subtitulo}>
+            Organize suas finanças em um só lugar.
           </Text>
         </View>
 
         {/* Formulário */}
-        <View style={styles.form}>
+        <View style={estilos.formulario}>
+          <Text style={estilos.titulo}>
+            Bem-vindo!
+          </Text>
 
-          {/* E-mail */}
-          <View style={styles.inputContainer}>
+          <Text style={estilos.descricao}>
+            Entre na sua conta para continuar.
+          </Text>
+
+          {/* Campo de e-mail */}
+          <Text style={estilos.rotulo}>
+            E-mail
+          </Text>
+
+          <View style={estilos.campo}>
             <Ionicons
-              name="person-outline"
-              size={20}
-              color="#222"
+              name="mail-outline"
+              size={21}
+              color="#888888"
             />
 
             <TextInput
-              style={styles.input}
-              placeholder="E-mail"
-              placeholderTextColor="#333"
+              style={estilos.input}
+              placeholder="Digite seu e-mail"
+              placeholderTextColor="#999999"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              accessibilityLabel="E-mail"
             />
           </View>
 
-          {/* Senha */}
-          <View style={styles.inputContainer}>
+          {/* Campo de senha */}
+          <Text style={estilos.rotulo}>
+            Senha
+          </Text>
+
+          <View style={estilos.campo}>
             <Ionicons
               name="lock-closed-outline"
-              size={20}
-              color="#222"
+              size={21}
+              color="#888888"
             />
 
             <TextInput
-              style={styles.input}
-              placeholder="Senha"
-              placeholderTextColor="#333"
+              style={estilos.input}
+              placeholder="Digite sua senha"
+              placeholderTextColor="#999999"
               value={senha}
               onChangeText={setSenha}
               secureTextEntry={!mostrarSenha}
+              autoCapitalize="none"
+              autoComplete="current-password"
+              accessibilityLabel="Senha"
             />
 
             <TouchableOpacity
               onPress={() => setMostrarSenha(!mostrarSenha)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'
+              }
             >
               <Ionicons
-                name={
-                  mostrarSenha
-                    ? 'eye-outline'
-                    : 'eye-off-outline'
-                }
+                name={mostrarSenha ? 'eye-off-outline' : 'eye-outline'}
                 size={21}
-                color="#222"
+                color="#888888"
               />
             </TouchableOpacity>
           </View>
 
-          {/* Lembrar / Esqueci */}
-          <View style={styles.options}>
-
-            <TouchableOpacity
-              style={styles.remember}
-              onPress={() => setLembrar(!lembrar)}
-            >
-              <View
-                style={[
-                  styles.checkbox,
-                  lembrar && styles.checkboxActive,
-                ]}
-              >
-                {lembrar && (
-                  <Ionicons
-                    name="checkmark"
-                    size={13}
-                    color="#fff"
-                  />
-                )}
-              </View>
-
-              <Text style={styles.rememberText}>
-                Lembrar-me
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity>
-              <Text style={styles.forgot}>
-                Esqueceu sua senha?
-              </Text>
-            </TouchableOpacity>
-
-          </View>
-
-          {/* Entrar */}
-            <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => router.replace('/home')}
-            >            
-            <Text style={styles.loginText}>
-              Entrar
+          {/* Recuperação de senha */}
+          <TouchableOpacity
+            style={estilos.botaoRecuperar}
+            onPress={() => {
+              // A recuperação de senha será implementada futuramente.
+            }}
+          >
+            <Text style={estilos.textoRecuperar}>
+              Esqueceu sua senha?
             </Text>
           </TouchableOpacity>
 
-          {/* Criar conta */}
-          <View style={styles.createArea}>
-            <Text style={styles.accountText}>
-              Não tem uma conta?
+          {/* Botão de entrada */}
+          <TouchableOpacity
+            style={estilos.botaoEntrar}
+            activeOpacity={0.8}
+            onPress={entrar}
+          >
+            <Text style={estilos.textoBotaoEntrar}>
+              Entrar
             </Text>
 
-            <TouchableOpacity>
-              <Text style={styles.createText}>
+            <Ionicons
+              name="arrow-forward"
+              size={20}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          {/* Acesso ao cadastro */}
+          <View style={estilos.areaCadastro}>
+            <Text style={estilos.textoCadastro}>
+              Ainda não tem uma conta?
+            </Text>
+
+            <TouchableOpacity onPress={abrirCadastro}>
+              <Text style={estilos.linkCadastro}>
                 Criar conta
               </Text>
             </TouchableOpacity>
           </View>
-
         </View>
 
-        {/* Logo inferior */}
-        <View style={styles.footer}>
-          <Text style={styles.bradesco}>
-            ◉ bradesco
-          </Text>
-        </View>
-
-      </View>
-    </SafeAreaView>
+        {/* Rodapé */}
+        <Text style={estilos.rodape}>
+          Suas finanças, organizadas em um só lugar.
+        </Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
+const estilos = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#B18768',
+    backgroundColor: '#FFFFFF',
   },
 
-  content: {
-    flex: 1,
+  conteudo: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 26,
+    paddingTop: 45,
+    paddingBottom: 25,
+  },
+
+  cabecalho: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 70,
+    marginBottom: 38,
   },
 
-  logoArea: {
-    alignItems: 'center',
-  },
-
-  logoCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 3,
-    borderColor: '#222',
+  logo: {
+    width: 76,
+    height: 76,
+    borderRadius: 24,
+    backgroundColor: '#D92344',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 15,
+    marginBottom: 16,
   },
 
-  logoText: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: '#222',
+  nomeAplicativo: {
+    fontSize: 27,
+    fontWeight: '800',
+    color: '#252525',
+    letterSpacing: -0.5,
   },
 
-  welcome: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: '#111',
+  subtitulo: {
+    fontSize: 14,
+    color: '#777777',
+    marginTop: 9,
+    textAlign: 'center',
   },
 
-  form: {
-    width: '82%',
-    borderWidth: 2,
-    borderColor: '#FF2028',
-    borderRadius: 7,
-    padding: 10,
+  formulario: {
+    width: '100%',
   },
 
-  inputContainer: {
-    height: 38,
-    borderWidth: 2,
-    borderColor: '#fff',
-    borderRadius: 7,
+  titulo: {
+    fontSize: 27,
+    fontWeight: '700',
+    color: '#252525',
+  },
+
+  descricao: {
+    fontSize: 14,
+    color: '#777777',
+    marginTop: 8,
+    marginBottom: 27,
+  },
+
+  rotulo: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 9,
+    marginTop: 16,
+  },
+
+  campo: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    marginBottom: 7,
-    backgroundColor: 'transparent',
+    height: 54,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    backgroundColor: '#FAFAFA',
+    gap: 11,
   },
 
   input: {
     flex: 1,
-    marginLeft: 7,
-    fontSize: 15,
-    color: '#222',
-    paddingVertical: 0,
+    height: '100%',
+    fontSize: 14,
+    color: '#252525',
   },
 
-  options: {
+  botaoRecuperar: {
+    alignSelf: 'flex-end',
+    marginTop: 14,
+    paddingVertical: 5,
+  },
+
+  textoRecuperar: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#D92344',
+  },
+
+  botaoEntrar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 2,
-    marginBottom: 8,
-  },
-
-  remember: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  checkbox: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 1,
-    borderColor: '#168B38',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 4,
+    height: 54,
+    borderRadius: 12,
+    backgroundColor: '#D92344',
+    marginTop: 27,
+    gap: 10,
   },
 
-  checkboxActive: {
-    backgroundColor: '#168B38',
+  textoBotaoEntrar: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 
-  rememberText: {
-    fontSize: 9,
-    color: '#222',
-  },
-
-  forgot: {
-    fontSize: 9,
-    color: '#FF2028',
-    textDecorationLine: 'underline',
-  },
-
-  loginButton: {
-    height: 34,
-    backgroundColor: '#FF2028',
-    alignItems: 'center',
+  areaCadastro: {
+    flexDirection: 'row',
     justifyContent: 'center',
-    borderRadius: 2,
-  },
-
-  loginText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-
-  createArea: {
     alignItems: 'center',
-    marginTop: 8,
+    flexWrap: 'wrap',
+    marginTop: 26,
+    gap: 5,
   },
 
-  accountText: {
-    fontSize: 9,
-    color: '#222',
+  textoCadastro: {
+    fontSize: 13,
+    color: '#777777',
   },
 
-  createText: {
-    fontSize: 10,
-    color: '#FF2028',
-    fontWeight: 'bold',
-    marginTop: 2,
+  linkCadastro: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#D92344',
   },
 
-  footer: {
-    alignSelf: 'flex-start',
-    marginLeft: 25,
-  },
-
-  bradesco: {
-    color: '#D71920',
-    fontSize: 15,
-    fontWeight: 'bold',
+  rodape: {
+    fontSize: 11,
+    color: '#AAAAAA',
+    textAlign: 'center',
+    marginTop: 35,
   },
 });
