@@ -4,14 +4,20 @@ import {
   TransacoesProvider,
 } from '../contexts/TransacoesContext';
 
+import {
+  CategoriasProvider,
+} from '../contexts/CategoriasContext';
+
 export default function Layout() {
   return (
-    <TransacoesProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
-    </TransacoesProvider>
+    <CategoriasProvider>
+      <TransacoesProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
+      </TransacoesProvider>
+    </CategoriasProvider>
   );
 }

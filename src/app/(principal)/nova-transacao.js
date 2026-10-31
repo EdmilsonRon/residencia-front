@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   View,
@@ -15,29 +15,34 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTransacoes } from '../../contexts/TransacoesContext';
-
-const categorias = [
-  'Alimentação',
-  'Moradia',
-  'Transporte',
-  'Saúde',
-  'Lazer',
-  'Salário',
-  'Trabalho',
-  'Educação',
-  'Outros',
-];
+import { useCategorias } from '../../contexts/CategoriasContext';
 
 export default function NovaTransacao() {
   const { adicionarTransacao } = useTransacoes();
+
+  const { categorias, obterCategoriasPorTipo } = useCategorias();
 
   const [tipo, setTipo] = useState('Despesa');
   const [descricao, setDescricao] = useState('');
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState('Alimentação');
+
   const [data, setData] = useState(
     new Date().toISOString().slice(0, 10)
   );
+
+  const categoriasDisponiveis = obterCategoriasPorTipo(tipo);
+
+  useEffect(() => {
+    const categoriaAindaDisponivel = categoriasDisponiveis.some(
+      (item) => item.nome === categoria
+    );
+
+    if (!categoriaAindaDisponivel) {
+      setCategoria(categoriasDisponiveis[0]?.nome || '');
+    }
+  }, [tipo, categorias]);
+
 
   function salvarTransacao() {
     if (!descricao.trim()) {
@@ -46,6 +51,13 @@ export default function NovaTransacao() {
         'Informe o nome da transação.'
       );
       return;
+    }
+    if (!categoria) {
+        Alert.alert(
+            'Categoria obrigatória',
+            'Selecione uma categoria para a transação.'
+        );
+        return;
     }
 
     // Aceita valores como 150, 150.50 ou 150,50.
@@ -239,37 +251,55 @@ export default function NovaTransacao() {
 
         {/* CATEGORIA */}
 
-        <Text style={estilos.rotulo}>
-          Categoria
+<Text style={estilos.rotulo}>
+  Categoria
+</Text>
+
+<View style={estilos.categorias}>
+  {categoriasDisponiveis.map((item) => {
+    const selecionada = categoria === item.nome;
+
+    return (
+      <TouchableOpacity
+        key={item.id}
+        style={[
+          estilos.botaoCategoria,
+          selecionada && estilos.categoriaSelecionada,
+          selecionada && {
+            backgroundColor: item.corFundo,
+            borderColor: item.cor,
+          },
+        ]}
+        onPress={() => setCategoria(item.nome)}
+        activeOpacity={0.8}
+      >
+        <Ionicons
+          name={item.icone}
+          size={16}
+          color={item.cor}
+        />
+
+        <Text
+          style={[
+            estilos.textoCategoria,
+            selecionada && {
+              color: item.cor,
+              fontWeight: '700',
+            },
+          ]}
+        >
+          {item.nome}
         </Text>
+      </TouchableOpacity>
+    );
+  })}
 
-        <View style={estilos.categorias}>
-          {categorias.map((item) => {
-            const selecionada = categoria === item;
-
-            return (
-              <TouchableOpacity
-                key={item}
-                style={[
-                  estilos.botaoCategoria,
-                  selecionada && estilos.categoriaSelecionada,
-                ]}
-                onPress={() => setCategoria(item)}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[
-                    estilos.textoCategoria,
-                    selecionada &&
-                      estilos.textoCategoriaSelecionada,
-                  ]}
-                >
-                  {item}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+  {categoriasDisponiveis.length === 0 && (
+    <Text style={estilos.textoCategoria}>
+      Nenhuma categoria disponível para esse tipo.
+    </Text>
+  )}
+</View>
 
         {/* DATA */}
 
@@ -480,14 +510,17 @@ const estilos = StyleSheet.create({
     marginBottom: 20,
   },
 
-  botaoCategoria: {
-    paddingHorizontal: 13,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: '#EAEAEA',
-    borderRadius: 11,
-    backgroundColor: '#FFFFFF',
-  },
+    botaoCategoria: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 7,
+        paddingHorizontal: 13,
+        paddingVertical: 10,
+        borderWidth: 1,
+        borderColor: '#EAEAEA',
+        borderRadius: 11,
+        backgroundColor: '#FFFFFF',
+    },
 
   categoriaSelecionada: {
     backgroundColor: '#FCE8E6',
