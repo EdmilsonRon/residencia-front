@@ -19,10 +19,39 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [erro, setErro] = useState('');
 
   function entrar() {
-    // A autenticação real será implementada posteriormente.
-    // Por enquanto, permite acessar a área financeira.
+    const emailLimpo = email.trim();
+
+    // Verifica se os campos foram preenchidos.
+    if (!emailLimpo || !senha) {
+      setErro('Preencha o e-mail e a senha para continuar.');
+      return;
+    }
+
+    // Verifica se o e-mail possui um formato válido.
+    const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formatoEmail.test(emailLimpo)) {
+      setErro('Digite um endereço de e-mail válido.');
+      return;
+    }
+
+    // Aplica a mesma regra mínima de senha do cadastro.
+    if (senha.length < 8) {
+      setErro('A senha deve ter pelo menos 8 caracteres.');
+      return;
+    }
+
+    // Limpa a mensagem de erro caso os campos sejam válidos.
+    setErro('');
+
+    /*
+      A autenticação real será implementada posteriormente.
+      Por enquanto, validamos os campos, mas ainda não
+      verificamos se a conta existe ou se a senha está correta.
+    */
     router.replace('/home');
   }
 
@@ -76,7 +105,12 @@ export default function Login() {
             E-mail
           </Text>
 
-          <View style={estilos.campo}>
+          <View
+            style={[
+              estilos.campo,
+              erro && estilos.campoErro,
+            ]}
+          >
             <Ionicons
               name="mail-outline"
               size={21}
@@ -88,12 +122,16 @@ export default function Login() {
               placeholder="Digite seu e-mail"
               placeholderTextColor="#999999"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(texto) => {
+                setEmail(texto);
+                setErro('');
+              }}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="email"
               accessibilityLabel="E-mail"
+              returnKeyType="next"
             />
           </View>
 
@@ -102,7 +140,12 @@ export default function Login() {
             Senha
           </Text>
 
-          <View style={estilos.campo}>
+          <View
+            style={[
+              estilos.campo,
+              erro && estilos.campoErro,
+            ]}
+          >
             <Ionicons
               name="lock-closed-outline"
               size={21}
@@ -114,11 +157,16 @@ export default function Login() {
               placeholder="Digite sua senha"
               placeholderTextColor="#999999"
               value={senha}
-              onChangeText={setSenha}
+              onChangeText={(texto) => {
+                setSenha(texto);
+                setErro('');
+              }}
               secureTextEntry={!mostrarSenha}
               autoCapitalize="none"
               autoComplete="current-password"
               accessibilityLabel="Senha"
+              returnKeyType="done"
+              onSubmitEditing={entrar}
             />
 
             <TouchableOpacity
@@ -136,12 +184,25 @@ export default function Login() {
             </TouchableOpacity>
           </View>
 
+          {/* Mensagem de erro */}
+          {erro !== '' && (
+            <View style={estilos.areaErro}>
+              <Ionicons
+                name="alert-circle-outline"
+                size={18}
+                color="#D92344"
+              />
+
+              <Text style={estilos.textoErro}>
+                {erro}
+              </Text>
+            </View>
+          )}
+
           {/* Recuperação de senha */}
           <TouchableOpacity
             style={estilos.botaoRecuperar}
-            onPress={() => {
-              // A recuperação de senha será implementada futuramente.
-            }}
+            onPress={() => router.push('/recuperar-senha')}
           >
             <Text style={estilos.textoRecuperar}>
               Esqueceu sua senha?
@@ -268,11 +329,29 @@ const estilos = StyleSheet.create({
     gap: 11,
   },
 
+  campoErro: {
+    borderColor: '#D92344',
+  },
+
   input: {
     flex: 1,
     height: '100%',
     fontSize: 14,
     color: '#252525',
+  },
+
+  areaErro: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginTop: 12,
+  },
+
+  textoErro: {
+    flex: 1,
+    fontSize: 13,
+    color: '#D92344',
+    lineHeight: 19,
   },
 
   botaoRecuperar: {

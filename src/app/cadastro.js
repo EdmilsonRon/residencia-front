@@ -79,13 +79,13 @@ export default function Cadastro() {
     // O cadastro real será conectado ao Spring Boot posteriormente.
     Alert.alert(
       'Cadastro validado!',
-      'Os dados foram validados. O próximo passo será conectar o cadastro ao servidor.',
+      'Os dados foram validados.',
       [
         {
           text: 'Ir para o login',
           onPress: () => router.replace('/login'),
         },
-      ]
+      ]  
     );
   }
 

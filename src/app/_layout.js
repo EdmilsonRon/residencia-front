@@ -1,11 +1,17 @@
 import { Stack } from 'expo-router';
 
+import {
+  TransacoesProvider,
+} from '../contexts/TransacoesContext';
+
 export default function Layout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <TransacoesProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+    </TransacoesProvider>
   );
 }

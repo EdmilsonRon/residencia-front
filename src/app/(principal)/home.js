@@ -9,64 +9,92 @@ import {
   StatusBar,
 } from 'react-native';
 
+import { useTransacoes } from '../../contexts/TransacoesContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 export default function Home() {
   const [saldoVisivel, setSaldoVisivel] = useState(true);
 
-  // Dados fictícios para desenvolver a interface.
-  // Posteriormente, eles virão do backend.
+  // Obtém as transações compartilhadas pelo aplicativo.
+  const { transacoes: transacoesContexto } = useTransacoes();
 
-  const saldoTotal = 4250.75;
-  const receitas = 5200.00;
-  const despesas = 1849.25;
+  // Calcula o total das receitas.
+  const receitas = transacoesContexto
+    .filter((transacao) => transacao.tipo === 'Receita')
+    .reduce(
+      (total, transacao) => total + Number(transacao.valor),
+      0
+    );
 
-  const transacoes = [
-    {
-      id: '1',
-      titulo: 'Supermercado',
-      categoria: 'Alimentação',
-      data: 'Hoje, 10:30',
-      valor: -245.80,
-      icone: 'cart-outline',
-      cor: '#FCE8E6',
-      corIcone: '#D92344',
-    },
-    {
-      id: '2',
-      titulo: 'Salário',
-      categoria: 'Renda',
-      data: 'Hoje, 08:00',
-      valor: 3500.00,
-      icone: 'wallet-outline',
-      cor: '#E4F5E9',
-      corIcone: '#238B45',
-    },
-    {
-      id: '3',
-      titulo: 'Academia',
-      categoria: 'Saúde',
-      data: 'Ontem, 16:45',
-      valor: -89.90,
-      icone: 'fitness-outline',
-      cor: '#F0E9FF',
-      corIcone: '#7950C7',
-    },
-    {
-      id: '4',
-      titulo: 'Conta de internet',
-      categoria: 'Moradia',
-      data: 'Ontem, 09:15',
-      valor: -99.90,
-      icone: 'wifi-outline',
-      cor: '#E7F0FF',
-      corIcone: '#3574C8',
-    },
-  ];
+  // Calcula o total das despesas.
+  const despesas = transacoesContexto
+    .filter((transacao) => transacao.tipo === 'Despesa')
+    .reduce(
+      (total, transacao) => total + Number(transacao.valor),
+      0
+    );
 
+  // Calcula o saldo disponível.
+  const saldoTotal = receitas - despesas;
+
+  // Formata as datas para exibição.
+  function formatarDataTransacao(data) {
+    if (!data) {
+      return '';
+    }
+
+    const [ano, mes, dia] = data.split('-');
+
+    if (!ano || !mes || !dia) {
+      return data;
+    }
+
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  // Prepara as transações para exibição no Home.
+  const transacoesRecentes = [...transacoesContexto]
+    .sort((a, b) => {
+      const dataA = `${a.data || ''}`;
+      const dataB = `${b.data || ''}`;
+
+      return dataB.localeCompare(dataA);
+    })
+    .slice(0, 4)
+    .map((transacao) => ({
+      id: transacao.id,
+      titulo: transacao.descricao,
+      categoria: transacao.categoria,
+      data: formatarDataTransacao(transacao.data),
+
+      valor:
+        transacao.tipo === 'Despesa'
+          ? -Math.abs(Number(transacao.valor))
+          : Math.abs(Number(transacao.valor)),
+
+      icone:
+        transacao.icone ||
+        (transacao.tipo === 'Receita'
+          ? 'wallet-outline'
+          : 'receipt-outline'),
+
+      cor:
+        transacao.corFundo ||
+        (transacao.tipo === 'Receita'
+          ? '#E4F5E9'
+          : '#FCE8E6'),
+
+      corIcone:
+        transacao.corIcone ||
+        (transacao.tipo === 'Receita'
+          ? '#238B45'
+          : '#D92344'),
+    }));
+
+  // Formata valores monetários.
   function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-BR', {
+    return Number(valor).toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     });
@@ -76,15 +104,23 @@ export default function Home() {
     router.navigate('/transacoes');
   }
 
+  function navegarParaNovaTransacao() {
+    router.push('/nova-transacao');
+  }
+
   function navegarParaCategorias() {
     router.navigate('/categorias');
   }
 
+  // Desenha uma transação na tela.
   function renderizarTransacao(transacao) {
     const entrada = transacao.valor > 0;
 
     return (
-      <View key={transacao.id} style={estilos.transacao}>
+      <View
+        key={transacao.id}
+        style={estilos.transacao}
+      >
         <View
           style={[
             estilos.iconeTransacao,
@@ -172,7 +208,9 @@ export default function Home() {
             </Text>
 
             <TouchableOpacity
-              onPress={() => setSaldoVisivel(!saldoVisivel)}
+              onPress={() =>
+                setSaldoVisivel(!saldoVisivel)
+              }
               accessibilityRole="button"
               accessibilityLabel={
                 saldoVisivel
@@ -239,6 +277,8 @@ export default function Home() {
         </View>
 
         <View style={estilos.resumoContainer}>
+          {/* RECEITAS */}
+
           <View style={estilos.cartaoResumo}>
             <View style={estilos.cabecalhoResumo}>
               <View
@@ -260,13 +300,18 @@ export default function Home() {
             </View>
 
             <Text
-              style={[estilos.valorResumo, estilos.valorEntrada]}
+              style={[
+                estilos.valorResumo,
+                estilos.valorEntrada,
+              ]}
               numberOfLines={1}
               adjustsFontSizeToFit
             >
               {formatarMoeda(receitas)}
             </Text>
           </View>
+
+          {/* DESPESAS */}
 
           <View style={estilos.cartaoResumo}>
             <View style={estilos.cabecalhoResumo}>
@@ -289,7 +334,10 @@ export default function Home() {
             </View>
 
             <Text
-              style={[estilos.valorResumo, estilos.valorSaida]}
+              style={[
+                estilos.valorResumo,
+                estilos.valorSaida,
+              ]}
               numberOfLines={1}
               adjustsFontSizeToFit
             >
@@ -328,7 +376,10 @@ export default function Home() {
               { mes: 'Set', valor: 58 },
               { mes: 'Out', valor: 85 },
             ].map((item) => (
-              <View key={item.mes} style={estilos.colunaGrafico}>
+              <View
+                key={item.mes}
+                style={estilos.colunaGrafico}
+              >
                 <View style={estilos.areaBarra}>
                   <View
                     style={[
@@ -379,7 +430,13 @@ export default function Home() {
         </View>
 
         <View style={estilos.cartaoTransacoes}>
-          {transacoes.map(renderizarTransacao)}
+          {transacoesRecentes.length > 0 ? (
+            transacoesRecentes.map(renderizarTransacao)
+          ) : (
+            <Text style={estilos.mensagemVazia}>
+              Nenhuma transação cadastrada.
+            </Text>
+          )}
         </View>
 
         {/* ACESSO RÁPIDO */}
@@ -392,7 +449,7 @@ export default function Home() {
           <TouchableOpacity
             style={estilos.botaoRapido}
             activeOpacity={0.7}
-            onPress={navegarParaTransacoes}
+            onPress={navegarParaNovaTransacao}
           >
             <View style={estilos.iconeRapido}>
               <Ionicons
@@ -425,7 +482,6 @@ export default function Home() {
             </Text>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
     </View>
   );
@@ -780,5 +836,12 @@ const estilos = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: '#333333',
+  },
+
+  mensagemVazia: {
+    paddingVertical: 20,
+    textAlign: 'center',
+    color: '#888888',
+    fontSize: 13,
   },
 });
