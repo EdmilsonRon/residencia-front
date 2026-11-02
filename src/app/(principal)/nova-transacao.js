@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 import {
@@ -10,10 +11,14 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
+
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+
 import { useTransacoes } from '../../contexts/TransacoesContext';
 import { useCategorias } from '../../contexts/CategoriasContext';
 
@@ -27,12 +32,16 @@ export default function NovaTransacao() {
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState('Alimentação');
 
-  const [data, setData] = useState(
-    new Date().toISOString().slice(0, 10)
-  );
+  // Data selecionada no calendário
+  const [data, setData] = useState(new Date());
+
+  // Controla a exibição do seletor de data
+  const [mostrarSeletorData, setMostrarSeletorData] = useState(false);
 
   const categoriasDisponiveis = obterCategoriasPorTipo(tipo);
 
+  // Atualiza a categoria caso ela não esteja disponível
+  // para o tipo de transação selecionado
   useEffect(() => {
     const categoriaAindaDisponivel = categoriasDisponiveis.some(
       (item) => item.nome === categoria
@@ -43,24 +52,59 @@ export default function NovaTransacao() {
     }
   }, [tipo, categorias]);
 
+  // Converte a data para AAAA-MM-DD
+  function formatarDataISO(dataEscolhida) {
+    const ano = dataEscolhida.getFullYear();
 
+    const mes = String(
+      dataEscolhida.getMonth() + 1
+    ).padStart(2, '0');
+
+    const dia = String(
+      dataEscolhida.getDate()
+    ).padStart(2, '0');
+
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  // Converte a data para DD/MM/AAAA
+  function formatarDataBrasileira(dataEscolhida) {
+    return dataEscolhida.toLocaleDateString('pt-BR');
+  }
+
+  // Evento de alteração da data
+  function aoAlterarData(event, dataEscolhida) {
+    if (Platform.OS === 'android') {
+      setMostrarSeletorData(false);
+    }
+
+    if (dataEscolhida) {
+      setData(dataEscolhida);
+    }
+  }
+
+  // Salvar transação
   function salvarTransacao() {
     if (!descricao.trim()) {
       Alert.alert(
         'Descrição obrigatória',
         'Informe o nome da transação.'
       );
+
       return;
     }
+
     if (!categoria) {
-        Alert.alert(
-            'Categoria obrigatória',
-            'Selecione uma categoria para a transação.'
-        );
-        return;
+      Alert.alert(
+        'Categoria obrigatória',
+        'Selecione uma categoria para a transação.'
+      );
+
+      return;
     }
 
     const valorNormalizado = valor.trim().replace(',', '.');
+
     const valorNumerico = Number(valorNormalizado);
 
     if (
@@ -72,31 +116,31 @@ export default function NovaTransacao() {
         'Valor inválido',
         'Digite um valor maior que zero.'
       );
-      return;
-    }
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) {
-      Alert.alert(
-        'Data inválida',
-        'Informe a data no formato AAAA-MM-DD.'
-      );
       return;
     }
 
     const novaTransacao = {
       descricao: descricao.trim(),
+
       categoria,
-      data,
+
+      data: formatarDataISO(data),
+
       valor: valorNumerico,
+
       tipo,
+
       icone:
         tipo === 'Receita'
           ? 'arrow-down-circle-outline'
           : 'arrow-up-circle-outline',
+
       corFundo:
         tipo === 'Receita'
           ? '#E4F5E9'
           : '#FCE8E6',
+
       corIcone:
         tipo === 'Receita'
           ? '#238B45'
@@ -118,7 +162,6 @@ export default function NovaTransacao() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* CABEÇALHO */}
 
         <View style={estilos.cabecalho}>
           <TouchableOpacity
@@ -144,7 +187,6 @@ export default function NovaTransacao() {
           </View>
         </View>
 
-        {/* TIPO DE TRANSAÇÃO */}
 
         <Text style={estilos.rotulo}>
           Tipo de transação
@@ -200,7 +242,6 @@ export default function NovaTransacao() {
           </TouchableOpacity>
         </View>
 
-        {/* VALOR */}
 
         <Text style={estilos.rotulo}>
           Valor
@@ -222,7 +263,6 @@ export default function NovaTransacao() {
           />
         </View>
 
-        {/* DESCRIÇÃO */}
 
         <Text style={estilos.rotulo}>
           Descrição
@@ -247,87 +287,134 @@ export default function NovaTransacao() {
           />
         </View>
 
-        {/* CATEGORIA */}
 
-<Text style={estilos.rotulo}>
-  Categoria
-</Text>
-
-<View style={estilos.categorias}>
-  {categoriasDisponiveis.map((item) => {
-    const selecionada = categoria === item.nome;
-
-    return (
-      <TouchableOpacity
-        key={item.id}
-        style={[
-          estilos.botaoCategoria,
-          selecionada && estilos.categoriaSelecionada,
-          selecionada && {
-            backgroundColor: item.corFundo,
-            borderColor: item.cor,
-          },
-        ]}
-        onPress={() => setCategoria(item.nome)}
-        activeOpacity={0.8}
-      >
-        <Ionicons
-          name={item.icone}
-          size={16}
-          color={item.cor}
-        />
-
-        <Text
-          style={[
-            estilos.textoCategoria,
-            selecionada && {
-              color: item.cor,
-              fontWeight: '700',
-            },
-          ]}
-        >
-          {item.nome}
+        <Text style={estilos.rotulo}>
+          Categoria
         </Text>
-      </TouchableOpacity>
-    );
-  })}
 
-  {categoriasDisponiveis.length === 0 && (
-    <Text style={estilos.textoCategoria}>
-      Nenhuma categoria disponível para esse tipo.
-    </Text>
-  )}
-</View>
+        <View style={estilos.categorias}>
+          {categoriasDisponiveis.map((item) => {
+            const selecionada = categoria === item.nome;
 
-        {/* DATA */}
+            return (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  estilos.botaoCategoria,
+                  selecionada && estilos.categoriaSelecionada,
+                  selecionada && {
+                    backgroundColor: item.corFundo,
+                    borderColor: item.cor,
+                  },
+                ]}
+                onPress={() => setCategoria(item.nome)}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name={item.icone}
+                  size={16}
+                  color={item.cor}
+                />
+
+                <Text
+                  style={[
+                    estilos.textoCategoria,
+                    selecionada && {
+                      color: item.cor,
+                      fontWeight: '700',
+                    },
+                  ]}
+                >
+                  {item.nome}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+
+          {categoriasDisponiveis.length === 0 && (
+            <Text style={estilos.textoCategoria}>
+              Nenhuma categoria disponível para esse tipo.
+            </Text>
+          )}
+        </View>
+
 
         <Text style={estilos.rotulo}>
           Data
         </Text>
 
-        <View style={estilos.campo}>
+        <TouchableOpacity
+          style={estilos.campo}
+          onPress={() => setMostrarSeletorData(true)}
+          activeOpacity={0.7}
+        >
           <Ionicons
             name="calendar-outline"
             size={21}
             color="#888888"
           />
 
-          <TextInput
-            style={estilos.input}
-            value={data}
-            onChangeText={setData}
-            placeholder="AAAA-MM-DD"
-            placeholderTextColor="#999999"
-            maxLength={10}
-            accessibilityLabel="Data da transação"
+          <Text style={estilos.textoData}>
+            {formatarDataBrasileira(data)}
+          </Text>
+
+          <Ionicons
+            name="chevron-down-outline"
+            size={18}
+            color="#888888"
           />
-        </View>
+        </TouchableOpacity>
 
-        <Text style={estilos.ajudaData}>
-          Informe a data no formato AAAA-MM-DD.
-        </Text>
 
-        {/* BOTÃO SALVAR */}
+        {Platform.OS === 'ios' && (
+          <Modal
+            visible={mostrarSeletorData}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setMostrarSeletorData(false)}
+          >
+            <View style={estilos.fundoModalData}>
+              <View style={estilos.modalData}>
+                <View style={estilos.cabecalhoModalData}>
+                  <Text style={estilos.tituloModalData}>
+                    Selecionar data
+                  </Text>
+
+                  <TouchableOpacity
+                    onPress={() => setMostrarSeletorData(false)}
+                  >
+                    <Text style={estilos.botaoConcluirData}>
+                      Concluir
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <DateTimePicker
+                  value={data}
+                  mode="date"
+                  display="spinner"
+                  onChange={aoAlterarData}
+                  maximumDate={new Date(2100, 11, 31)}
+                  minimumDate={new Date(1900, 0, 1)}
+                  locale="pt-BR"
+                />
+              </View>
+            </View>
+          </Modal>
+        )}
+
+
+        {Platform.OS === 'android' && mostrarSeletorData && (
+          <DateTimePicker
+            value={data}
+            mode="date"
+            display="default"
+            onChange={aoAlterarData}
+            maximumDate={new Date(2100, 11, 31)}
+            minimumDate={new Date(1900, 0, 1)}
+          />
+        )}
+
 
         <TouchableOpacity
           style={[
@@ -508,17 +595,17 @@ const estilos = StyleSheet.create({
     marginBottom: 20,
   },
 
-    botaoCategoria: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 7,
-        paddingHorizontal: 13,
-        paddingVertical: 10,
-        borderWidth: 1,
-        borderColor: '#EAEAEA',
-        borderRadius: 11,
-        backgroundColor: '#FFFFFF',
-    },
+  botaoCategoria: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    paddingHorizontal: 13,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+  },
 
   categoriaSelecionada: {
     backgroundColor: '#FCE8E6',
@@ -531,17 +618,51 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
   },
 
-  textoCategoriaSelecionada: {
-    color: '#D92344',
-    fontWeight: '800',
+  // DATA
+
+  textoData: {
+    flex: 1,
+    fontSize: 14,
+    color: '#252525',
+    paddingVertical: 13,
   },
 
-  ajudaData: {
-    fontSize: 11,
-    color: '#888888',
-    marginTop: -12,
-    marginBottom: 20,
+  // MODAL DE DATA IOS
+
+  fundoModalData: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
+
+  modalData: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    padding: 20,
+    paddingBottom: 30,
+  },
+
+  cabecalhoModalData: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+
+  tituloModalData: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#252525',
+  },
+
+  botaoConcluirData: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#D92344',
+  },
+
+  // BOTÃO SALVAR
 
   botaoSalvar: {
     minHeight: 55,

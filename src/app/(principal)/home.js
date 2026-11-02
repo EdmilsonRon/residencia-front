@@ -1,14 +1,15 @@
+
 import React, { useState } from 'react';
 
-import estilos from '../../styles/homeStyles';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  StyleSheet,
   StatusBar,
 } from 'react-native';
+
+import estilos from '../../styles/homeStyles';
 
 import { useTransacoes } from '../../contexts/TransacoesContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,23 +20,34 @@ export default function Home() {
 
   const { transacoes: transacoesContexto } = useTransacoes();
 
+  // RECEITAS E DESPESAS GERAIS
+
   const receitas = transacoesContexto
     .filter((transacao) => transacao.tipo === 'Receita')
     .reduce(
-      (total, transacao) => total + Number(transacao.valor),
+      (total, transacao) => total + Number(transacao.valor || 0),
       0
     );
-
 
   const despesas = transacoesContexto
     .filter((transacao) => transacao.tipo === 'Despesa')
     .reduce(
-      (total, transacao) => total + Number(transacao.valor),
+      (total, transacao) => total + Number(transacao.valor || 0),
       0
     );
 
-
   const saldoTotal = receitas - despesas;
+
+  // FORMATAÇÃO DE VALORES
+
+  function formatarMoeda(valor) {
+    return Number(valor || 0).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  }
+
+  // FORMATAÇÃO DE DATA
 
   function formatarDataTransacao(data) {
     if (!data) {
@@ -50,6 +62,93 @@ export default function Home() {
 
     return `${dia}/${mes}/${ano}`;
   }
+
+  // GRÁFICO DOS ÚLTIMOS 6 MESES
+
+  const dataAtual = new Date();
+
+  const mesesGrafico = Array.from({ length: 6 }, (_, indice) => {
+    const dataMes = new Date(
+      dataAtual.getFullYear(),
+      dataAtual.getMonth() - 5 + indice,
+      1
+    );
+
+    const ano = dataMes.getFullYear();
+    const mes = dataMes.getMonth();
+
+    const receitasMes = transacoesContexto
+      .filter((transacao) => {
+        if (transacao.tipo !== 'Receita' || !transacao.data) {
+          return false;
+        }
+
+        const [anoTransacao, mesTransacao] = transacao.data.split('-');
+
+        return (
+          Number(anoTransacao) === ano &&
+          Number(mesTransacao) === mes + 1
+        );
+      })
+      .reduce(
+        (total, transacao) => total + Number(transacao.valor || 0),
+        0
+      );
+
+    const despesasMes = transacoesContexto
+      .filter((transacao) => {
+        if (transacao.tipo !== 'Despesa' || !transacao.data) {
+          return false;
+        }
+
+        const [anoTransacao, mesTransacao] = transacao.data.split('-');
+
+        return (
+          Number(anoTransacao) === ano &&
+          Number(mesTransacao) === mes + 1
+        );
+      })
+      .reduce(
+        (total, transacao) => total + Number(transacao.valor || 0),
+        0
+      );
+
+    const nomesMeses = [
+      'Jan',
+      'Fev',
+      'Mar',
+      'Abr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Set',
+      'Out',
+      'Nov',
+      'Dez',
+    ];
+
+    return {
+      mes: nomesMeses[mes],
+      ano,
+      receitas: receitasMes,
+      despesas: despesasMes,
+      saldo: receitasMes - despesasMes,
+    };
+  });
+
+  const [mesSelecionado, setMesSelecionado] = useState(5);
+
+  const dadosMesSelecionado = mesesGrafico[mesSelecionado];
+
+  const maiorValorGrafico = Math.max(
+    1,
+    ...mesesGrafico.map((item) =>
+      Math.max(item.receitas, item.despesas)
+    )
+  );
+
+  // TRANSAÇÕES RECENTES
 
   const transacoesRecentes = [...transacoesContexto]
     .sort((a, b) => {
@@ -89,12 +188,7 @@ export default function Home() {
           : '#D92344'),
     }));
 
-  function formatarMoeda(valor) {
-    return Number(valor).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
-  }
+  // NAVEGAÇÃO
 
   function navegarParaTransacoes() {
     router.navigate('/transacoes');
@@ -107,6 +201,8 @@ export default function Home() {
   function navegarParaCategorias() {
     router.navigate('/categorias');
   }
+
+  // COMPONENTE DE TRANSAÇÃO
 
   function renderizarTransacao(transacao) {
     const entrada = transacao.valor > 0;
@@ -154,6 +250,8 @@ export default function Home() {
     );
   }
 
+  // TELA
+
   return (
     <View style={estilos.container}>
       <StatusBar
@@ -165,7 +263,6 @@ export default function Home() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={estilos.conteudo}
       >
-        {/* CABEÇALHO */}
 
         <View style={estilos.cabecalho}>
           <View>
@@ -194,7 +291,6 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        {/* CARTÃO DE SALDO */}
 
         <View style={estilos.cartaoSaldo}>
           <View style={estilos.linhaSaldo}>
@@ -203,14 +299,10 @@ export default function Home() {
             </Text>
 
             <TouchableOpacity
-              onPress={() =>
-                setSaldoVisivel(!saldoVisivel)
-              }
+              onPress={() => setSaldoVisivel(!saldoVisivel)}
               accessibilityRole="button"
               accessibilityLabel={
-                saldoVisivel
-                  ? 'Ocultar saldo'
-                  : 'Mostrar saldo'
+                saldoVisivel ? 'Ocultar saldo' : 'Mostrar saldo'
               }
             >
               <Ionicons
@@ -259,7 +351,6 @@ export default function Home() {
           </View>
         </View>
 
-        {/* RESUMO DO MÊS */}
 
         <View style={estilos.tituloSecao}>
           <Text style={estilos.tituloSecaoTexto}>
@@ -267,12 +358,14 @@ export default function Home() {
           </Text>
 
           <Text style={estilos.mesAtual}>
-            Outubro 2026
+            {dataAtual.toLocaleDateString('pt-BR', {
+              month: 'long',
+              year: 'numeric',
+            })}
           </Text>
         </View>
 
         <View style={estilos.resumoContainer}>
-          {/* RECEITAS */}
 
           <View style={estilos.cartaoResumo}>
             <View style={estilos.cabecalhoResumo}>
@@ -306,7 +399,6 @@ export default function Home() {
             </Text>
           </View>
 
-          {/* DESPESAS */}
 
           <View style={estilos.cartaoResumo}>
             <View style={estilos.cabecalhoResumo}>
@@ -341,7 +433,6 @@ export default function Home() {
           </View>
         </View>
 
-        {/* EVOLUÇÃO FINANCEIRA */}
 
         <View style={estilos.tituloSecao}>
           <Text style={estilos.tituloSecaoTexto}>
@@ -359,65 +450,151 @@ export default function Home() {
 
         <View style={estilos.cartaoGrafico}>
           <Text style={estilos.descricaoGrafico}>
-            Saldo ao longo dos últimos 6 meses
+            Receitas e despesas dos últimos 6 meses
           </Text>
 
-          <View style={estilos.grafico}>
-            {[
-              { mes: 'Mai', valor: 35 },
-              { mes: 'Jun', valor: 50 },
-              { mes: 'Jul', valor: 42 },
-              { mes: 'Ago', valor: 68 },
-              { mes: 'Set', valor: 58 },
-              { mes: 'Out', valor: 85 },
-            ].map((item) => (
-              <View
-                key={item.mes}
-                style={estilos.colunaGrafico}
-              >
-                <View style={estilos.areaBarra}>
-                  <View
-                    style={[
-                      estilos.barraGrafico,
-                      { height: `${item.valor}%` },
-                      item.mes === 'Out' &&
-                        estilos.barraGraficoAtiva,
-                    ]}
-                  />
-                </View>
 
-                <Text
-                  style={[
-                    estilos.textoMes,
-                    item.mes === 'Out' &&
-                      estilos.textoMesAtivo,
-                  ]}
-                >
-                  {item.mes}
-                </Text>
-              </View>
-            ))}
-          </View>
+          <View style={estilos.resumoMesGrafico}>
+            <Text style={estilos.nomeMesGrafico}>
+              {dadosMesSelecionado.mes} {dadosMesSelecionado.ano}
+            </Text>
 
-          <View style={estilos.legendaGrafico}>
-            <View style={estilos.pontoLegenda} />
+            <Text style={estilos.rotuloSaldoGrafico}>
+              Resultado do mês
+            </Text>
 
-            <Text style={estilos.textoLegenda}>
-              Evolução do saldo
+            <Text
+              style={[
+                estilos.valorSaldoGrafico,
+                {
+                  color:
+                    dadosMesSelecionado.saldo >= 0
+                      ? '#238B45'
+                      : '#D92344',
+                },
+              ]}
+            >
+              {formatarMoeda(dadosMesSelecionado.saldo)}
             </Text>
           </View>
+
+
+          <View style={estilos.grafico}>
+            {mesesGrafico.map((item, indice) => {
+              const selecionado = indice === mesSelecionado;
+
+              const alturaReceita =
+                (item.receitas / maiorValorGrafico) * 100;
+
+              const alturaDespesa =
+                (item.despesas / maiorValorGrafico) * 100;
+
+              return (
+                <TouchableOpacity
+                  key={`${item.mes}-${item.ano}`}
+                  style={estilos.colunaGrafico}
+                  onPress={() => setMesSelecionado(indice)}
+                  activeOpacity={0.7}
+                >
+                  <View style={estilos.areaBarrasDuplas}>
+                    <View
+                      style={[
+                        estilos.barraGrafico,
+                        estilos.barraReceitaGrafico,
+                        {
+                          height:
+                            item.receitas > 0
+                              ? Math.max(alturaReceita, 4)
+                              : 0,
+                        },
+                        selecionado &&
+                          estilos.barraSelecionada,
+                      ]}
+                    />
+
+                    <View
+                      style={[
+                        estilos.barraGrafico,
+                        estilos.barraDespesaGrafico,
+                        {
+                          height:
+                            item.despesas > 0
+                              ? Math.max(alturaDespesa, 4)
+                              : 0,
+                        },
+                        selecionado &&
+                          estilos.barraSelecionada,
+                      ]}
+                    />
+                  </View>
+
+                  <Text
+                    style={[
+                      estilos.textoMes,
+                      selecionado && estilos.textoMesAtivo,
+                    ]}
+                  >
+                    {item.mes}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+
+          <View style={estilos.legendaGrafico}>
+            <View style={estilos.itemLegendaGrafico}>
+              <View style={estilos.pontoReceitaGrafico} />
+
+              <Text style={estilos.textoLegenda}>
+                Receitas
+              </Text>
+            </View>
+
+            <View style={estilos.itemLegendaGrafico}>
+              <View style={estilos.pontoDespesaGrafico} />
+
+              <Text style={estilos.textoLegenda}>
+                Despesas
+              </Text>
+            </View>
+          </View>
+
+
+          <View style={estilos.detalhesGrafico}>
+            <View style={estilos.linhaDetalheGrafico}>
+              <Text style={estilos.textoDetalheGrafico}>
+                Total de receitas
+              </Text>
+
+              <Text style={estilos.valorReceitaDetalhe}>
+                {formatarMoeda(dadosMesSelecionado.receitas)}
+              </Text>
+            </View>
+
+            <View style={estilos.linhaDetalheGrafico}>
+              <Text style={estilos.textoDetalheGrafico}>
+                Total de despesas
+              </Text>
+
+              <Text style={estilos.valorDespesaDetalhe}>
+                {formatarMoeda(dadosMesSelecionado.despesas)}
+              </Text>
+            </View>
+          </View>
+
+          <Text style={estilos.instrucaoGrafico}>
+            Toque em um mês para consultar os valores.
+          </Text>
         </View>
 
-        {/* TRANSAÇÕES RECENTES */}
 
         <View style={estilos.tituloSecao}>
           <Text style={estilos.tituloSecaoTexto}>
             Transações recentes
           </Text>
 
-          <TouchableOpacity
-            onPress={navegarParaTransacoes}
-          >
+          <TouchableOpacity onPress={navegarParaTransacoes}>
             <Text style={estilos.linkVerTodos}>
               Ver todas
             </Text>
@@ -434,7 +611,6 @@ export default function Home() {
           )}
         </View>
 
-        {/* ACESSO RÁPIDO */}
 
         <Text style={estilos.tituloSecaoTexto}>
           Acesso rápido
@@ -481,4 +657,3 @@ export default function Home() {
     </View>
   );
 }
-

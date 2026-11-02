@@ -61,8 +61,7 @@ export default function SideMenu({ visible, onClose }) {
     onClose();
     
     router.replace('/login');
-    // O logout real será implementado futuramente.
-    // Por enquanto, esta função apenas fecha o menu.
+    
   }
 
   return (
@@ -74,13 +73,11 @@ export default function SideMenu({ visible, onClose }) {
       statusBarTranslucent
     >
       <View style={estilos.fundoModal}>
-        {/* Área escurecida fora do menu */}
         <Pressable
           style={estilos.areaExterna}
           onPress={onClose}
         />
 
-        {/* Painel lateral */}
         <View style={estilos.painel}>
           <View style={estilos.cabecalho}>
             <View style={estilos.logo}>

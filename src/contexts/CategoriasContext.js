@@ -1,9 +1,7 @@
-
 import React, { createContext, useContext, useState } from 'react';
 
 const CategoriasContext = createContext(null);
 
-// Categorias disponíveis inicialmente.
 const categoriasIniciais = [
   {
     id: '1',
@@ -151,6 +149,38 @@ export function CategoriasProvider({ children }) {
     };
   }
 
+  // Remove uma categoria, exceto "Outros".
+  function removerCategoria(id) {
+    const categoriaEncontrada = categorias.find(
+      (categoria) => categoria.id === id
+    );
+
+    if (!categoriaEncontrada) {
+      return {
+        sucesso: false,
+        mensagem: 'Categoria não encontrada.',
+      };
+    }
+
+    if (categoriaEncontrada.nome.trim().toLowerCase() === 'outros') {
+      return {
+        sucesso: false,
+        mensagem: 'A categoria Outros não pode ser excluída.',
+      };
+    }
+
+    setCategorias((atuais) =>
+      ordenarCategorias(
+        atuais.filter((categoria) => categoria.id !== id)
+      )
+    );
+
+    return {
+      sucesso: true,
+      mensagem: 'Categoria removida com sucesso!',
+    };
+  }
+
   function obterCategoriasPorTipo(tipo) {
     const filtradas = categorias.filter(
       (categoria) => categoria.tipo === tipo
@@ -164,6 +194,7 @@ export function CategoriasProvider({ children }) {
       value={{
         categorias: ordenarCategorias(categorias),
         adicionarCategoria,
+        removerCategoria,
         obterCategoriasPorTipo,
       }}
     >

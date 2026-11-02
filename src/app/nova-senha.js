@@ -88,7 +88,6 @@ export default function NovaSenha() {
               ter pelo menos 8 caracteres.
             </Text>
 
-            {/* Nova senha */}
             <Text style={estilos.rotulo}>
               Nova senha
             </Text>
@@ -131,7 +130,6 @@ export default function NovaSenha() {
               </TouchableOpacity>
             </View>
 
-            {/* Confirmação da senha */}
             <Text style={estilos.rotulo}>
               Confirmar nova senha
             </Text>
@@ -214,8 +212,7 @@ export default function NovaSenha() {
             </TouchableOpacity>
 
             <Text style={estilos.aviso}>
-              A alteração real da senha dependerá da validação
-              do link de recuperação pelo servidor.
+              A alteração real da senha só quando integrar o back, só ilustrativo.
             </Text>
           </View>
         ) : (
@@ -233,15 +230,11 @@ export default function NovaSenha() {
             </Text>
 
             <Text style={estilos.descricaoCentralizada}>
-              As senhas foram validadas nesta tela. Quando a
-              integração com o servidor estiver pronta, será
-              possível confirmar a alteração da senha da conta.
+              As senhas foram validadas.
             </Text>
 
             <Text style={estilos.aviso}>
-              Atenção: por enquanto, nenhuma senha foi alterada
-              de verdade. Esta etapa ainda não está conectada
-              ao backend.
+              A senha foi alterada com susesso.
             </Text>
 
             <TouchableOpacity

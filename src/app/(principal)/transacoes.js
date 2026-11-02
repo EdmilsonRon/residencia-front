@@ -160,7 +160,6 @@ export default function Transacoes() {
         contentContainerStyle={estilos.conteudo}
         keyboardShouldPersistTaps="handled"
       >
-        {/* CABEÇALHO */}
 
         <View style={estilos.cabecalho}>
           <View>
@@ -188,7 +187,6 @@ export default function Transacoes() {
           </TouchableOpacity>
         </View>
 
-        {/* RESUMO FINANCEIRO */}
 
         <View style={estilos.cartaoSaldo}>
           <Text style={estilos.rotuloSaldo}>
@@ -242,7 +240,6 @@ export default function Transacoes() {
           </View>
         </View>
 
-        {/* PERÍODO */}
 
         <View style={estilos.cabecalhoLista}>
           <Text style={estilos.tituloSecao}>
@@ -262,7 +259,6 @@ export default function Transacoes() {
           </View>
         </View>
 
-        {/* PESQUISA */}
 
         <View style={estilos.campoBusca}>
           <Ionicons
@@ -296,7 +292,6 @@ export default function Transacoes() {
           )}
         </View>
 
-        {/* FILTROS */}
 
         <ScrollView
           horizontal
@@ -333,7 +328,6 @@ export default function Transacoes() {
           })}
         </ScrollView>
 
-        {/* LISTA DE TRANSAÇÕES */}
 
         {gruposPorData.length > 0 ? (
           gruposPorData.map(([data, itens]) => (
@@ -379,7 +373,6 @@ export default function Transacoes() {
           </View>
         )}
 
-        {/* RODAPÉ DA LISTA */}
 
         <Text style={estilos.rodape}>
           Exibindo {transacoesFiltradas.length}{' '}

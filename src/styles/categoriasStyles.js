@@ -505,6 +505,16 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
     color: '#777777',
   },
+  botaoExcluirCategoria: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FCE8E6',
+    marginLeft: 8,
+  },
+  
 });
 
 export default estilos;

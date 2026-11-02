@@ -16,6 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import { useCategorias } from '../../contexts/CategoriasContext';
+import { useTransacoes } from '../../contexts/TransacoesContext';
 
 import estilos from '../../styles/categoriasStyles';
 
@@ -37,7 +38,10 @@ const iconesDisponiveis = [
   { nome: 'musical-notes-outline', descricao: 'Música' },
   { nome: 'cash-outline', descricao: 'Renda' },
   { nome: 'trending-up-outline', descricao: 'Investimentos' },
-  { nome: 'ellipsis-horizontal-circle-outline', descricao: 'Outros' },
+  {
+    nome: 'ellipsis-horizontal-circle-outline',
+    descricao: 'Outros',
+  },
 ];
 
 const coresDisponiveis = [
@@ -55,7 +59,12 @@ export default function Categorias() {
   const {
     categorias,
     adicionarCategoria,
+    removerCategoria,
   } = useCategorias();
+
+  const {
+    atualizarCategoriaTransacoes,
+  } = useTransacoes();
 
   const [tipoFiltro, setTipoFiltro] = useState('Despesa');
   const [modalVisivel, setModalVisivel] = useState(false);
@@ -63,7 +72,9 @@ export default function Categorias() {
   const [nome, setNome] = useState('');
   const [tipoNovo, setTipoNovo] = useState('Despesa');
   const [iconeSelecionado, setIconeSelecionado] = useState('cart-outline');
-  const [corSelecionada, setCorSelecionada] = useState(coresDisponiveis[0]);
+  const [corSelecionada, setCorSelecionada] = useState(
+    coresDisponiveis[0]
+  );
   const [erro, setErro] = useState('');
 
   const categoriasFiltradas = categorias.filter(
@@ -73,14 +84,19 @@ export default function Categorias() {
   function abrirFormulario() {
     setNome('');
     setTipoNovo(tipoFiltro);
+
     setIconeSelecionado(
-      tipoFiltro === 'Receita' ? 'wallet-outline' : 'cart-outline'
+      tipoFiltro === 'Receita'
+        ? 'wallet-outline'
+        : 'cart-outline'
     );
+
     setCorSelecionada(
       tipoFiltro === 'Receita'
         ? coresDisponiveis[1]
         : coresDisponiveis[0]
     );
+
     setErro('');
     setModalVisivel(true);
   }
@@ -118,17 +134,89 @@ export default function Categorias() {
       return;
     }
 
-    Alert.alert('Categoria criada', 'Sua nova categoria foi adicionada.');
+    Alert.alert(
+      'Categoria criada',
+      'Sua nova categoria foi adicionada.'
+    );
+  }
+
+  function excluirCategoria(categoria) {
+    const categoriaProtegida =
+      categoria.nome.trim().toLowerCase() === 'outros';
+
+    if (categoriaProtegida) {
+      Alert.alert(
+        'Categoria protegida',
+        'A categoria Outros não pode ser excluída.'
+      );
+
+      return;
+    }
+
+    function confirmarExclusao() {
+      atualizarCategoriaTransacoes(
+        categoria.nome,
+        'Outros',
+        categoria.tipo
+      );
+
+      const resultado = removerCategoria(categoria.id);
+
+      if (!resultado.sucesso) {
+        if (Platform.OS === 'web') {
+          window.alert(resultado.mensagem);
+        } else {
+          Alert.alert('Erro', resultado.mensagem);
+        }
+      }
+    }
+
+    if (Platform.OS === 'web') {
+      const confirmou = window.confirm(
+        `Tem certeza que deseja excluir a categoria "${categoria.nome}"?\n\n` +
+        `Todas as transações dessa categoria serão transferidas para "Outros".`
+      );
+
+      if (confirmou) {
+        confirmarExclusao();
+      }
+
+      return;
+    }
+
+    Alert.alert(
+      'Excluir categoria',
+      `Tem certeza que deseja excluir "${categoria.nome}"?\n\n` +
+        'Todas as transações dessa categoria serão transferidas para "Outros".',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: confirmarExclusao,
+        },
+      ]
+    );
   }
 
   function renderizarCategoria(categoria) {
+    const categoriaProtegida =
+      categoria.nome.trim().toLowerCase() === 'outros';
+
     return (
-      <View key={categoria.id} style={estilos.cartaoCategoria}>
+      <View
+        key={categoria.id}
+        style={estilos.cartaoCategoria}
+      >
         <View
           style={[
             estilos.iconeCategoria,
             {
-              backgroundColor: categoria.corFundo || '#F1F1F1',
+              backgroundColor:
+                categoria.corFundo || '#F1F1F1',
             },
           ]}
         >
@@ -145,7 +233,9 @@ export default function Categorias() {
           </Text>
 
           <Text style={estilos.tipoCategoria}>
-            {categoria.tipo === 'Receita' ? 'Receita' : 'Despesa'}
+            {categoria.tipo === 'Receita'
+              ? 'Receita'
+              : 'Despesa'}
           </Text>
         </View>
 
@@ -154,23 +244,42 @@ export default function Categorias() {
             estilos.indicadorTipo,
             {
               backgroundColor:
-                categoria.tipo === 'Receita' ? '#238B45' : '#D92344',
+                categoria.tipo === 'Receita'
+                  ? '#238B45'
+                  : '#D92344',
             },
           ]}
         />
+
+        {!categoriaProtegida && (
+          <TouchableOpacity
+            style={estilos.botaoExcluirCategoria}
+            onPress={() => excluirCategoria(categoria)}
+            activeOpacity={0.7}
+            accessibilityLabel={`Excluir categoria ${categoria.nome}`}
+          >
+            <Ionicons
+              name="trash-outline"
+              size={20}
+              color="#D92344"
+            />
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
 
   return (
     <View style={estilos.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#FFFFFF"
+      />
 
       <ScrollView
         contentContainerStyle={estilos.conteudo}
         showsVerticalScrollIndicator={false}
       >
-        {/* CABEÇALHO */}
 
         <View style={estilos.cabecalho}>
           <View style={estilos.textosCabecalho}>
@@ -189,11 +298,14 @@ export default function Categorias() {
             activeOpacity={0.8}
             accessibilityLabel="Adicionar nova categoria"
           >
-            <Ionicons name="add" size={27} color="#FFFFFF" />
+            <Ionicons
+              name="add"
+              size={27}
+              color="#FFFFFF"
+            />
           </TouchableOpacity>
         </View>
 
-        {/* RESUMO */}
 
         <View style={estilos.cartaoResumo}>
           <View style={estilos.resumoItem}>
@@ -211,7 +323,11 @@ export default function Categorias() {
               </Text>
 
               <Text style={estilos.resumoNumero}>
-                {categorias.filter((item) => item.tipo === 'Receita').length}
+                {
+                  categorias.filter(
+                    (item) => item.tipo === 'Receita'
+                  ).length
+                }
               </Text>
             </View>
           </View>
@@ -233,19 +349,23 @@ export default function Categorias() {
               </Text>
 
               <Text style={estilos.resumoNumero}>
-                {categorias.filter((item) => item.tipo === 'Despesa').length}
+                {
+                  categorias.filter(
+                    (item) => item.tipo === 'Despesa'
+                  ).length
+                }
               </Text>
             </View>
           </View>
         </View>
 
-        {/* FILTRO */}
 
         <View style={estilos.seletorTipos}>
           <TouchableOpacity
             style={[
               estilos.botaoFiltro,
-              tipoFiltro === 'Despesa' && estilos.filtroDespesaAtivo,
+              tipoFiltro === 'Despesa' &&
+                estilos.filtroDespesaAtivo,
             ]}
             onPress={() => setTipoFiltro('Despesa')}
             activeOpacity={0.8}
@@ -253,13 +373,18 @@ export default function Categorias() {
             <Ionicons
               name="arrow-up-circle-outline"
               size={19}
-              color={tipoFiltro === 'Despesa' ? '#FFFFFF' : '#D92344'}
+              color={
+                tipoFiltro === 'Despesa'
+                  ? '#FFFFFF'
+                  : '#D92344'
+              }
             />
 
             <Text
               style={[
                 estilos.textoFiltro,
-                tipoFiltro === 'Despesa' && estilos.textoFiltroAtivo,
+                tipoFiltro === 'Despesa' &&
+                  estilos.textoFiltroAtivo,
               ]}
             >
               Despesas
@@ -269,7 +394,8 @@ export default function Categorias() {
           <TouchableOpacity
             style={[
               estilos.botaoFiltro,
-              tipoFiltro === 'Receita' && estilos.filtroReceitaAtivo,
+              tipoFiltro === 'Receita' &&
+                estilos.filtroReceitaAtivo,
             ]}
             onPress={() => setTipoFiltro('Receita')}
             activeOpacity={0.8}
@@ -277,13 +403,18 @@ export default function Categorias() {
             <Ionicons
               name="arrow-down-circle-outline"
               size={19}
-              color={tipoFiltro === 'Receita' ? '#FFFFFF' : '#238B45'}
+              color={
+                tipoFiltro === 'Receita'
+                  ? '#FFFFFF'
+                  : '#238B45'
+              }
             />
 
             <Text
               style={[
                 estilos.textoFiltro,
-                tipoFiltro === 'Receita' && estilos.textoFiltroAtivo,
+                tipoFiltro === 'Receita' &&
+                  estilos.textoFiltroAtivo,
               ]}
             >
               Receitas
@@ -291,7 +422,6 @@ export default function Categorias() {
           </TouchableOpacity>
         </View>
 
-        {/* LISTA DE CATEGORIAS */}
 
         <View style={estilos.cabecalhoLista}>
           <Text style={estilos.tituloLista}>
@@ -302,7 +432,9 @@ export default function Categorias() {
 
           <Text style={estilos.contador}>
             {categoriasFiltradas.length}
-            {categoriasFiltradas.length === 1 ? ' categoria' : ' categorias'}
+            {categoriasFiltradas.length === 1
+              ? ' categoria'
+              : ' categorias'}
           </Text>
         </View>
 
@@ -333,7 +465,11 @@ export default function Categorias() {
               onPress={abrirFormulario}
               activeOpacity={0.8}
             >
-              <Ionicons name="add" size={19} color="#FFFFFF" />
+              <Ionicons
+                name="add"
+                size={19}
+                color="#FFFFFF"
+              />
 
               <Text style={estilos.textoBotaoVazio}>
                 Criar categoria
@@ -342,14 +478,17 @@ export default function Categorias() {
           </View>
         )}
 
-        {/* BOTÃO INFERIOR */}
 
         <TouchableOpacity
           style={estilos.botaoNovaCategoria}
           onPress={abrirFormulario}
           activeOpacity={0.8}
         >
-          <Ionicons name="add-circle-outline" size={21} color="#D92344" />
+          <Ionicons
+            name="add-circle-outline"
+            size={21}
+            color="#D92344"
+          />
 
           <Text style={estilos.textoBotaoNovaCategoria}>
             Nova categoria
@@ -357,7 +496,6 @@ export default function Categorias() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* MODAL DE CADASTRO */}
 
       <Modal
         visible={modalVisivel}
@@ -390,17 +528,22 @@ export default function Categorias() {
                   onPress={fecharFormulario}
                   accessibilityLabel="Fechar formulário"
                 >
-                  <Ionicons name="close" size={23} color="#555555" />
+                  <Ionicons
+                    name="close"
+                    size={23}
+                    color="#555555"
+                  />
                 </TouchableOpacity>
               </View>
 
-              {/* PRÉVIA */}
 
               <View style={estilos.previaCategoria}>
                 <View
                   style={[
                     estilos.iconePrevia,
-                    { backgroundColor: corSelecionada.fundo },
+                    {
+                      backgroundColor: corSelecionada.fundo,
+                    },
                   ]}
                 >
                   <Ionicons
@@ -421,7 +564,6 @@ export default function Categorias() {
                 </View>
               </View>
 
-              {/* NOME */}
 
               <Text style={estilos.rotulo}>
                 Nome da categoria
@@ -440,7 +582,6 @@ export default function Categorias() {
                 returnKeyType="done"
               />
 
-              {/* TIPO */}
 
               <Text style={estilos.rotulo}>
                 Tipo de categoria
@@ -450,7 +591,8 @@ export default function Categorias() {
                 <TouchableOpacity
                   style={[
                     estilos.opcaoTipoModal,
-                    tipoNovo === 'Despesa' && estilos.opcaoDespesaAtiva,
+                    tipoNovo === 'Despesa' &&
+                      estilos.opcaoDespesaAtiva,
                   ]}
                   onPress={() => {
                     setTipoNovo('Despesa');
@@ -460,13 +602,18 @@ export default function Categorias() {
                   <Ionicons
                     name="arrow-up-circle-outline"
                     size={21}
-                    color={tipoNovo === 'Despesa' ? '#FFFFFF' : '#D92344'}
+                    color={
+                      tipoNovo === 'Despesa'
+                        ? '#FFFFFF'
+                        : '#D92344'
+                    }
                   />
 
                   <Text
                     style={[
                       estilos.textoOpcaoTipo,
-                      tipoNovo === 'Despesa' && estilos.textoOpcaoTipoAtivo,
+                      tipoNovo === 'Despesa' &&
+                        estilos.textoOpcaoTipoAtivo,
                     ]}
                   >
                     Despesa
@@ -476,7 +623,8 @@ export default function Categorias() {
                 <TouchableOpacity
                   style={[
                     estilos.opcaoTipoModal,
-                    tipoNovo === 'Receita' && estilos.opcaoReceitaAtiva,
+                    tipoNovo === 'Receita' &&
+                      estilos.opcaoReceitaAtiva,
                   ]}
                   onPress={() => {
                     setTipoNovo('Receita');
@@ -486,13 +634,18 @@ export default function Categorias() {
                   <Ionicons
                     name="arrow-down-circle-outline"
                     size={21}
-                    color={tipoNovo === 'Receita' ? '#FFFFFF' : '#238B45'}
+                    color={
+                      tipoNovo === 'Receita'
+                        ? '#FFFFFF'
+                        : '#238B45'
+                    }
                   />
 
                   <Text
                     style={[
                       estilos.textoOpcaoTipo,
-                      tipoNovo === 'Receita' && estilos.textoOpcaoTipoAtivo,
+                      tipoNovo === 'Receita' &&
+                        estilos.textoOpcaoTipoAtivo,
                     ]}
                   >
                     Receita
@@ -500,7 +653,6 @@ export default function Categorias() {
                 </TouchableOpacity>
               </View>
 
-              {/* ÍCONES */}
 
               <Text style={estilos.rotulo}>
                 Escolha um ícone
@@ -519,7 +671,9 @@ export default function Categorias() {
                         backgroundColor: corSelecionada.fundo,
                       },
                     ]}
-                    onPress={() => setIconeSelecionado(item.nome)}
+                    onPress={() =>
+                      setIconeSelecionado(item.nome)
+                    }
                     accessibilityLabel={item.descricao}
                   >
                     <Ionicons
@@ -535,7 +689,6 @@ export default function Categorias() {
                 ))}
               </View>
 
-              {/* CORES */}
 
               <Text style={estilos.rotulo}>
                 Escolha uma cor
@@ -547,7 +700,9 @@ export default function Categorias() {
                     key={cor.principal}
                     style={[
                       estilos.opcaoCor,
-                      { backgroundColor: cor.principal },
+                      {
+                        backgroundColor: cor.principal,
+                      },
                       corSelecionada.principal === cor.principal &&
                         estilos.opcaoCorAtiva,
                     ]}
@@ -565,7 +720,6 @@ export default function Categorias() {
                 ))}
               </View>
 
-              {/* ERRO */}
 
               {erro ? (
                 <View style={estilos.caixaErro}>
@@ -581,14 +735,15 @@ export default function Categorias() {
                 </View>
               ) : null}
 
-              {/* AÇÕES */}
 
               <TouchableOpacity
                 style={[
                   estilos.botaoSalvar,
                   {
                     backgroundColor:
-                      tipoNovo === 'Receita' ? '#238B45' : '#D92344',
+                      tipoNovo === 'Receita'
+                        ? '#238B45'
+                        : '#D92344',
                   },
                 ]}
                 onPress={salvarCategoria}
@@ -620,4 +775,3 @@ export default function Categorias() {
     </View>
   );
 }
-

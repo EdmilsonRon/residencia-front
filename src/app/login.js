@@ -63,7 +63,6 @@ export default function Login() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Identidade visual */}
         <View style={estilos.cabecalho}>
           <View style={estilos.logo}>
             <Ionicons
@@ -82,7 +81,6 @@ export default function Login() {
           </Text>
         </View>
 
-        {/* Formulário */}
         <View style={estilos.formulario}>
           <Text style={estilos.titulo}>
             Bem-vindo!
@@ -92,7 +90,6 @@ export default function Login() {
             Entre na sua conta para continuar.
           </Text>
 
-          {/* Campo de e-mail */}
           <Text style={estilos.rotulo}>
             E-mail
           </Text>
@@ -127,7 +124,6 @@ export default function Login() {
             />
           </View>
 
-          {/* Campo de senha */}
           <Text style={estilos.rotulo}>
             Senha
           </Text>
@@ -176,7 +172,6 @@ export default function Login() {
             </TouchableOpacity>
           </View>
 
-          {/* Mensagem de erro */}
           {erro !== '' && (
             <View style={estilos.areaErro}>
               <Ionicons
@@ -191,7 +186,6 @@ export default function Login() {
             </View>
           )}
 
-          {/* Recuperação de senha */}
           <TouchableOpacity
             style={estilos.botaoRecuperar}
             onPress={() => router.push('/recuperar-senha')}
@@ -201,7 +195,6 @@ export default function Login() {
             </Text>
           </TouchableOpacity>
 
-          {/* Botão de entrada */}
           <TouchableOpacity
             style={estilos.botaoEntrar}
             activeOpacity={0.8}
@@ -218,7 +211,6 @@ export default function Login() {
             />
           </TouchableOpacity>
 
-          {/* Acesso ao cadastro */}
           <View style={estilos.areaCadastro}>
             <Text style={estilos.textoCadastro}>
               Ainda não tem uma conta?
@@ -232,7 +224,6 @@ export default function Login() {
           </View>
         </View>
 
-        {/* Rodapé */}
         <Text style={estilos.rodape}>
           Suas finanças, organizadas em um só lugar.
         </Text>

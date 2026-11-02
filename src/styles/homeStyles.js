@@ -1,3 +1,4 @@
+
 import { StyleSheet } from 'react-native';
 
 const estilos = StyleSheet.create({
@@ -51,6 +52,7 @@ const estilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFFFFF',
   },
+
 
   cartaoSaldo: {
     backgroundColor: '#D92344',
@@ -113,6 +115,7 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
 
+
   tituloSecao: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -132,7 +135,9 @@ const estilos = StyleSheet.create({
     fontSize: 12,
     color: '#888888',
     marginBottom: 14,
+    textTransform: 'capitalize',
   },
+
 
   resumoContainer: {
     flexDirection: 'row',
@@ -190,6 +195,7 @@ const estilos = StyleSheet.create({
     marginBottom: 14,
   },
 
+
   cartaoGrafico: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
@@ -205,6 +211,31 @@ const estilos = StyleSheet.create({
     marginBottom: 18,
   },
 
+  resumoMesGrafico: {
+    marginBottom: 18,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: '#FAFAFA',
+  },
+
+  nomeMesGrafico: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#555555',
+  },
+
+  rotuloSaldoGrafico: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#888888',
+  },
+
+  valorSaldoGrafico: {
+    marginTop: 4,
+    fontSize: 24,
+    fontWeight: '800',
+  },
+
   grafico: {
     height: 145,
     flexDirection: 'row',
@@ -218,22 +249,32 @@ const estilos = StyleSheet.create({
     justifyContent: 'flex-end',
   },
 
-  areaBarra: {
+  areaBarrasDuplas: {
     height: 120,
-    width: 24,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    gap: 3,
   },
 
   barraGrafico: {
-    width: 18,
-    backgroundColor: '#F4C3CC',
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
 
-  barraGraficoAtiva: {
+  barraReceitaGrafico: {
+    backgroundColor: '#238B45',
+    width: 10,
+  },
+
+  barraDespesaGrafico: {
     backgroundColor: '#D92344',
+    width: 10,
+  },
+
+  barraSelecionada: {
+    opacity: 1,
   },
 
   textoMes: {
@@ -251,14 +292,27 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 18,
-    gap: 7,
+    gap: 18,
+    marginTop: 16,
   },
 
-  pontoLegenda: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  itemLegendaGrafico: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+
+  pontoReceitaGrafico: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: '#238B45',
+  },
+
+  pontoDespesaGrafico: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
     backgroundColor: '#D92344',
   },
 
@@ -266,6 +320,45 @@ const estilos = StyleSheet.create({
     fontSize: 11,
     color: '#777777',
   },
+
+  detalhesGrafico: {
+    marginTop: 18,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    gap: 12,
+  },
+
+  linhaDetalheGrafico: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  textoDetalheGrafico: {
+    fontSize: 12,
+    color: '#777777',
+  },
+
+  valorReceitaDetalhe: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#238B45',
+  },
+
+  valorDespesaDetalhe: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#D92344',
+  },
+
+  instrucaoGrafico: {
+    marginTop: 14,
+    fontSize: 10,
+    textAlign: 'center',
+    color: '#999999',
+  },
+
 
   cartaoTransacoes: {
     backgroundColor: '#FFFFFF',
@@ -316,6 +409,14 @@ const estilos = StyleSheet.create({
     flexShrink: 0,
   },
 
+  mensagemVazia: {
+    paddingVertical: 20,
+    textAlign: 'center',
+    color: '#888888',
+    fontSize: 13,
+  },
+
+
   acessosRapidos: {
     flexDirection: 'row',
     gap: 12,
@@ -350,12 +451,6 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
     color: '#333333',
   },
-
-  mensagemVazia: {
-    paddingVertical: 20,
-    textAlign: 'center',
-    color: '#888888',
-    fontSize: 13,
-  },
 });
+
 export default estilos;

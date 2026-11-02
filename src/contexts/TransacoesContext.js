@@ -91,25 +91,48 @@ export function TransacoesProvider({ children }) {
     transacoesIniciais
   );
 
-function adicionarTransacao(novaTransacao) {
-  const transacaoCriada = {
-    ...novaTransacao,
-    id: `${Date.now()}-${Math.random()}`,
-    criadoEm: new Date().toISOString(),
-  };
+  function adicionarTransacao(novaTransacao) {
+    const transacaoCriada = {
+      ...novaTransacao,
+      id: `${Date.now()}-${Math.random()}`,
+      criadoEm: new Date().toISOString(),
+    };
 
-  setTransacoes((atuais) => [
-    transacaoCriada,
-    ...atuais,
-  ]);
-}
+    setTransacoes((atuais) => [
+      transacaoCriada,
+      ...atuais,
+    ]);
+  }
 
+  // excluído para "Outros".
+  function atualizarCategoriaTransacoes(
+    categoriaAntiga,
+    categoriaNova,
+    tipo
+  ) {
+    setTransacoes((transacoesAtuais) =>
+      transacoesAtuais.map((transacao) => {
+        if (
+          transacao.categoria === categoriaAntiga &&
+          transacao.tipo === tipo
+        ) {
+          return {
+            ...transacao,
+            categoria: categoriaNova,
+          };
+        }
+
+        return transacao;
+      })
+    );
+  }
 
   return (
     <TransacoesContext.Provider
       value={{
         transacoes,
         adicionarTransacao,
+        atualizarCategoriaTransacoes,
       }}
     >
       {children}

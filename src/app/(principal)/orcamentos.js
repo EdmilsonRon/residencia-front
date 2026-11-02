@@ -170,7 +170,6 @@ export default function Orcamentos() {
         contentContainerStyle={estilos.conteudo}
         showsVerticalScrollIndicator={false}
       >
-        {/* Cabeçalho */}
         <View style={estilos.cabecalho}>
           <View>
             <Text style={estilos.titulo}>Orçamentos</Text>
@@ -192,7 +191,6 @@ export default function Orcamentos() {
           </TouchableOpacity>
         </View>
 
-        {/* Resumo dos orçamentos */}
         <View style={estilos.resumo}>
           <Text style={estilos.resumoTitulo}>
             Limites deste mês
@@ -231,7 +229,6 @@ export default function Orcamentos() {
           </View>
         </View>
 
-        {/* Lista de orçamentos */}
         <View style={estilos.secaoCabecalho}>
           <Text style={estilos.secaoTitulo}>
             Seus orçamentos
@@ -298,7 +295,6 @@ export default function Orcamentos() {
                 key={orcamento.id}
                 style={estilos.cartao}
               >
-                {/* Categoria e ações */}
                 <View style={estilos.cartaoCabecalho}>
                   <View style={estilos.categoriaInfo}>
                     <View
@@ -334,7 +330,6 @@ export default function Orcamentos() {
                   </View>
 
                   <View style={estilos.acoes}>
-                    {/* Editar */}
                     <TouchableOpacity
                       onPress={() => abrirModal(orcamento)}
                       style={estilos.botaoAcao}
@@ -346,7 +341,6 @@ export default function Orcamentos() {
                       />
                     </TouchableOpacity>
 
-                    {/* Excluir */}
                     <TouchableOpacity
                       onPress={() =>
                         confirmarExclusao(orcamento.id)
@@ -362,7 +356,6 @@ export default function Orcamentos() {
                   </View>
                 </View>
 
-                {/* Progresso */}
                 <View style={estilos.gastosLinha}>
                   <Text style={estilos.gastoTexto}>
                     Gasto: {dinheiro(gasto)}
@@ -412,7 +405,6 @@ export default function Orcamentos() {
         )}
       </ScrollView>
 
-      {/* Modal de criação e edição */}
       <Modal
         visible={modalVisivel}
         transparent
@@ -439,7 +431,6 @@ export default function Orcamentos() {
               </TouchableOpacity>
             </View>
 
-            {/* Seleção de categoria */}
             <Text style={estilos.label}>
               Categoria
             </Text>
@@ -488,7 +479,6 @@ export default function Orcamentos() {
               ))}
             </ScrollView>
 
-            {/* Limite */}
             <Text style={estilos.label}>
               Limite mensal (R$)
             </Text>
@@ -501,7 +491,6 @@ export default function Orcamentos() {
               keyboardType="decimal-pad"
             />
 
-            {/* Salvar */}
             <TouchableOpacity
               style={estilos.botaoSalvar}
               onPress={salvarOrcamento}

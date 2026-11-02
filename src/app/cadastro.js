@@ -104,7 +104,6 @@ export default function Cadastro() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* CABEÇALHO */}
 
         <View style={estilos.cabecalho}>
           <View style={estilos.logo}>
@@ -124,7 +123,6 @@ export default function Cadastro() {
           </Text>
         </View>
 
-        {/* FORMULÁRIO */}
 
         <View style={estilos.formulario}>
           <Text style={estilos.titulo}>
@@ -135,7 +133,6 @@ export default function Cadastro() {
             Preencha seus dados para começar.
           </Text>
 
-          {/* NOME */}
 
           <Text style={estilos.rotulo}>
             Nome completo
@@ -162,7 +159,6 @@ export default function Cadastro() {
             />
           </View>
 
-          {/* E-MAIL */}
 
           <Text style={estilos.rotulo}>
             E-mail
@@ -190,7 +186,6 @@ export default function Cadastro() {
             />
           </View>
 
-          {/* SENHA */}
 
           <Text style={estilos.rotulo}>
             Senha
@@ -235,7 +230,6 @@ export default function Cadastro() {
             </TouchableOpacity>
           </View>
 
-          {/* CONFIRMAR SENHA */}
 
           <Text style={estilos.rotulo}>
             Confirmar senha
@@ -284,7 +278,6 @@ export default function Cadastro() {
             </TouchableOpacity>
           </View>
 
-          {/* TERMOS */}
 
           <TouchableOpacity
             style={estilos.areaTermos}
@@ -313,7 +306,6 @@ export default function Cadastro() {
             </Text>
           </TouchableOpacity>
 
-          {/* BOTÃO CADASTRAR */}
 
           <TouchableOpacity
             style={estilos.botaoCadastrar}
@@ -331,7 +323,6 @@ export default function Cadastro() {
             />
           </TouchableOpacity>
 
-          {/* VOLTAR AO LOGIN */}
 
           <View style={estilos.areaLogin}>
             <Text style={estilos.textoLogin}>

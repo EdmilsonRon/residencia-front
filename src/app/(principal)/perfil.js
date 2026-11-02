@@ -46,7 +46,6 @@ export default function Perfil() {
       contentContainerStyle={estilos.conteudo}
       showsVerticalScrollIndicator={false}
     >
-      {/* Cabeçalho */}
       <View style={estilos.cabecalho}>
         <TouchableOpacity
           style={estilos.botaoVoltar}
@@ -58,7 +57,6 @@ export default function Perfil() {
         <Text style={estilos.titulo}>Meu perfil</Text>
       </View>
 
-      {/* Informações principais */}
       <View style={estilos.cartaoPerfil}>
         <View style={estilos.avatar}>
           <Ionicons name="person" size={48} color="#FFFFFF" />
@@ -76,7 +74,6 @@ export default function Perfil() {
         </TouchableOpacity>
       </View>
 
-      {/* Dados da conta */}
       <Text style={estilos.tituloSecao}>Informações pessoais</Text>
 
       <View style={estilos.cartaoInformacoes}>
@@ -118,7 +115,6 @@ export default function Perfil() {
         </View>
       </View>
 
-      {/* Opções da conta */}
       <Text style={estilos.tituloSecao}>Conta e segurança</Text>
 
       <View style={estilos.cartaoOpcoes}>
@@ -156,7 +152,6 @@ export default function Perfil() {
         </TouchableOpacity>
       </View>
 
-      {/* Sair */}
       <TouchableOpacity
         style={estilos.botaoSair}
         onPress={sairDaConta}

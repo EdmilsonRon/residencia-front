@@ -13,7 +13,6 @@ const estilos = StyleSheet.create({
     paddingBottom: 35,
   },
 
-  // CABEÇALHO
   cabecalho: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -46,7 +45,6 @@ const estilos = StyleSheet.create({
     marginTop: 5,
   },
 
-  // PERÍODO
   rotuloSecao: {
     fontSize: 13,
     fontWeight: '700',
@@ -85,7 +83,6 @@ const estilos = StyleSheet.create({
     color: '#FFFFFF',
   },
 
-  // SALDO
   cartaoSaldo: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
@@ -127,7 +124,6 @@ const estilos = StyleSheet.create({
     marginTop: 15,
   },
 
-  // RESUMO
   gradeResumo: {
     flexDirection: 'row',
     gap: 12,
@@ -162,7 +158,6 @@ const estilos = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // SEÇÕES
   secao: {
     marginBottom: 25,
   },
@@ -188,7 +183,6 @@ const estilos = StyleSheet.create({
     borderColor: '#EEEEEE',
   },
 
-  // GRÁFICO DE COMPARAÇÃO
   linhaGrafico: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,7 +227,6 @@ const estilos = StyleSheet.create({
     borderRadius: 10,
   },
 
-  // CATEGORIAS
   filtrosCategoria: {
     flexDirection: 'row',
     backgroundColor: '#EEEEEE',
@@ -343,7 +336,6 @@ const estilos = StyleSheet.create({
     borderRadius: 8,
   },
 
-  // ESTADO VAZIO
   vazio: {
     alignItems: 'center',
     paddingVertical: 25,
@@ -356,7 +348,6 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // AVISO
   aviso: {
     flexDirection: 'row',
     alignItems: 'flex-start',

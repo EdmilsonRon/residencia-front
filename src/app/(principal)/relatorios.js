@@ -108,7 +108,6 @@ export default function Relatorios() {
         contentContainerStyle={estilos.conteudo}
         showsVerticalScrollIndicator={false}
       >
-        {/* CABEÇALHO */}
         <View style={estilos.cabecalho}>
           <TouchableOpacity
             style={estilos.botaoVoltar}
@@ -125,7 +124,6 @@ export default function Relatorios() {
           </View>
         </View>
 
-        {/* FILTRO DE PERÍODO */}
         <Text style={estilos.rotuloSecao}>Período</Text>
 
         <View style={estilos.filtros}>
@@ -158,7 +156,6 @@ export default function Relatorios() {
           })}
         </View>
 
-        {/* SALDO */}
         <View style={estilos.cartaoSaldo}>
           <View style={estilos.linhaSaldo}>
             <View>
@@ -198,7 +195,6 @@ export default function Relatorios() {
           </Text>
         </View>
 
-        {/* RESUMO */}
         <View style={estilos.gradeResumo}>
           <View style={estilos.cartaoResumo}>
             <View style={estilos.linhaResumo}>
@@ -239,7 +235,6 @@ export default function Relatorios() {
           </View>
         </View>
 
-        {/* COMPARAÇÃO */}
         <View style={estilos.secao}>
           <Text style={estilos.tituloSecao}>Receitas x despesas</Text>
 
@@ -248,7 +243,6 @@ export default function Relatorios() {
           </Text>
 
           <View style={estilos.cartao}>
-            {/* RECEITAS */}
             <View style={estilos.linhaGrafico}>
               <View style={estilos.infoGrafico}>
                 <View
@@ -274,7 +268,6 @@ export default function Relatorios() {
               />
             </View>
 
-            {/* DESPESAS */}
             <View style={[estilos.linhaGrafico, { marginTop: 20 }]}>
               <View style={estilos.infoGrafico}>
                 <View
@@ -302,7 +295,6 @@ export default function Relatorios() {
           </View>
         </View>
 
-        {/* CATEGORIAS */}
         <View style={estilos.secao}>
           <Text style={estilos.tituloSecao}>Gastos por categoria</Text>
 
@@ -438,7 +430,6 @@ export default function Relatorios() {
           </View>
         </View>
 
-        {/* AVISO */}
         <View style={estilos.aviso}>
           <Ionicons
             name="information-circle-outline"
