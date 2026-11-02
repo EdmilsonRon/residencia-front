@@ -30,28 +30,15 @@ export default function NovaSenha() {
       setErro('Preencha os dois campos de senha.');
       return;
     }
-
     if (senha.length < 8) {
       setErro('A nova senha deve ter pelo menos 8 caracteres.');
       return;
     }
-
     if (senha !== confirmarSenha) {
       setErro('As senhas não são iguais. Verifique os campos.');
       return;
     }
-
     setErro('');
-
-    /*
-      FUTURAMENTE:
-      Enviar a nova senha e o token de recuperação
-      ao backend para concluir a redefinição.
-
-      A senha só deverá ser alterada se o token
-      for válido e ainda estiver dentro do prazo.
-    */
-
     setSenhaAlterada(true);
   }
 

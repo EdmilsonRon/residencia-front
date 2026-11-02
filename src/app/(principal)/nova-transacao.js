@@ -60,7 +60,6 @@ export default function NovaTransacao() {
         return;
     }
 
-    // Aceita valores como 150, 150.50 ou 150,50.
     const valorNormalizado = valor.trim().replace(',', '.');
     const valorNumerico = Number(valorNormalizado);
 
@@ -106,7 +105,6 @@ export default function NovaTransacao() {
 
     adicionarTransacao(novaTransacao);
 
-    // Retorna à lista depois de registrar a movimentação.
     router.replace('/transacoes');
   }
 

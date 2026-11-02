@@ -59,7 +59,8 @@ export default function SideMenu({ visible, onClose }) {
 
   function sairDoAplicativo() {
     onClose();
-
+    
+    router.replace('/login');
     // O logout real será implementado futuramente.
     // Por enquanto, esta função apenas fecha o menu.
   }

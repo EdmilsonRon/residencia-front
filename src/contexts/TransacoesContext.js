@@ -91,15 +91,19 @@ export function TransacoesProvider({ children }) {
     transacoesIniciais
   );
 
-  function adicionarTransacao(novaTransacao) {
-    setTransacoes((atuais) => [
-      {
-        ...novaTransacao,
-        id: `${Date.now()}-${Math.random()}`,
-      },
-      ...atuais,
-    ]);
-  }
+function adicionarTransacao(novaTransacao) {
+  const transacaoCriada = {
+    ...novaTransacao,
+    id: `${Date.now()}-${Math.random()}`,
+    criadoEm: new Date().toISOString(),
+  };
+
+  setTransacoes((atuais) => [
+    transacaoCriada,
+    ...atuais,
+  ]);
+}
+
 
   return (
     <TransacoesContext.Provider

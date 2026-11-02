@@ -1,8 +1,9 @@
+
 import React, { createContext, useContext, useState } from 'react';
 
 const CategoriasContext = createContext(null);
 
-// Categorias que já estarão disponíveis inicialmente.
+// Categorias disponíveis inicialmente.
 const categoriasIniciais = [
   {
     id: '1',
@@ -84,10 +85,31 @@ const categoriasIniciais = [
     cor: '#777777',
     corFundo: '#F0F0F0',
   },
+  {
+    id: '11',
+    nome: 'Outros',
+    tipo: 'Receita',
+    icone: 'ellipsis-horizontal-circle-outline',
+    cor: '#777777',
+    corFundo: '#F0F0F0',
+  },
 ];
 
 export function CategoriasProvider({ children }) {
   const [categorias, setCategorias] = useState(categoriasIniciais);
+
+  // Mantém "Outros" sempre no final da lista.
+  function ordenarCategorias(lista) {
+    return [...lista].sort((a, b) => {
+      const aOutros = a.nome.trim().toLowerCase() === 'outros';
+      const bOutros = b.nome.trim().toLowerCase() === 'outros';
+
+      if (aOutros && !bOutros) return 1;
+      if (!aOutros && bOutros) return -1;
+
+      return 0;
+    });
+  }
 
   function adicionarCategoria(novaCategoria) {
     const nomeNormalizado = novaCategoria.nome.trim().toLowerCase();
@@ -118,7 +140,9 @@ export function CategoriasProvider({ children }) {
       nome: novaCategoria.nome.trim(),
     };
 
-    setCategorias((atuais) => [...atuais, categoriaCriada]);
+    setCategorias((atuais) =>
+      ordenarCategorias([...atuais, categoriaCriada])
+    );
 
     return {
       sucesso: true,
@@ -128,13 +152,17 @@ export function CategoriasProvider({ children }) {
   }
 
   function obterCategoriasPorTipo(tipo) {
-    return categorias.filter((categoria) => categoria.tipo === tipo);
+    const filtradas = categorias.filter(
+      (categoria) => categoria.tipo === tipo
+    );
+
+    return ordenarCategorias(filtradas);
   }
 
   return (
     <CategoriasContext.Provider
       value={{
-        categorias,
+        categorias: ordenarCategorias(categorias),
         adicionarCategoria,
         obterCategoriasPorTipo,
       }}

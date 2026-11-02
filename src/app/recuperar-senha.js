@@ -36,16 +36,7 @@ export default function RecuperarSenha() {
     }
 
     setErro('');
-
-    /*
-      FUTURAMENTE:
-      Enviar o e-mail ao backend para solicitar
-      a recuperação da senha.
-
-      O backend deverá enviar um link seguro
-      para o endereço informado.
-    */
-
+    
     setSolicitacaoEnviada(true);
   }
 

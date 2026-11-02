@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 
 import {
@@ -17,9 +18,6 @@ export default function Transacoes() {
   const [filtroAtivo, setFiltroAtivo] = useState('Todas');
   const [busca, setBusca] = useState('');
 
-  // Dados fictícios para desenvolver a interface.
-  // Posteriormente, serão carregados do back-end.
-
   const { transacoes } = useTransacoes();
 
   function formatarMoeda(valor) {
@@ -29,7 +27,6 @@ export default function Transacoes() {
     });
   }
 
-  // Calcula os totais a partir das transações fictícias.
 
   const totalReceitas = transacoes
     .filter((item) => item.tipo === 'Receita')
@@ -41,7 +38,6 @@ export default function Transacoes() {
 
   const saldoPeriodo = totalReceitas - totalDespesas;
 
-  // Aplica o filtro e a pesquisa.
 
   const transacoesFiltradas = useMemo(() => {
     return transacoes.filter((item) => {
@@ -59,7 +55,6 @@ export default function Transacoes() {
     });
   }, [filtroAtivo, busca]);
 
-  // Agrupa as movimentações por data.
 
   const gruposPorData = useMemo(() => {
     const grupos = {};
@@ -72,7 +67,16 @@ export default function Transacoes() {
       grupos[item.data].push(item);
     });
 
-    return Object.entries(grupos);
+    Object.keys(grupos).forEach((data) => {
+      grupos[data].sort((a, b) => {
+        return (b.criadoEm || '').localeCompare(a.criadoEm || '');
+      });
+    });
+
+    // Ordena os dias
+    return Object.entries(grupos).sort(([dataA], [dataB]) => {
+      return dataB.localeCompare(dataA);
+    });
   }, [transacoesFiltradas]);
 
   function abrirNovaTransacao() {
@@ -126,6 +130,27 @@ export default function Transacoes() {
         </View>
       </View>
     );
+  }
+
+  function formatarData(data) {
+    const [ano, mes, dia] = data.split('-');
+
+    const meses = [
+      'jan.',
+      'fev.',
+      'mar.',
+      'abr.',
+      'mai.',
+      'jun.',
+      'jul.',
+      'ago.',
+      'set.',
+      'out.',
+      'nov.',
+      'dez.',
+    ];
+
+    return `${dia} ${meses[Number(mes) - 1]} ${ano}`;
   }
 
   return (
@@ -365,27 +390,6 @@ export default function Transacoes() {
       </ScrollView>
     </View>
   );
-  function formatarData(data) {
-    const [ano, mes, dia] = data.split('-');
-
-    const meses = [
-        'jan.',
-        'fev.',
-        'mar.',
-        'abr.',
-        'mai.',
-        'jun.',
-        'jul.',
-        'ago.',
-        'set.',
-        'out.',
-        'nov.',
-        'dez.',
-    ];
-    return `${dia} ${meses[Number(mes) - 1]} ${ano}`;
-}
-
-
 }
 
 const estilos = StyleSheet.create({
