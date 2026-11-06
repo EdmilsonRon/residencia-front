@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 import {
@@ -10,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BottomMenu from '../../components/BottomMenu';
 import SideMenu from '../../components/SideMenu';
+import ResponsiveContainer from '../../components/ResponsiveContainer';
 
 export default function LayoutPrincipal() {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -28,15 +30,17 @@ export default function LayoutPrincipal() {
       edges={['top', 'bottom']}
     >
       <View style={estilos.conteudo}>
-        <Stack
-          initialRouteName="home"
-          screenOptions={{
-            headerShown: false,
-            contentStyle: {
-              backgroundColor: '#FFFFFF',
-            },
-          }}
-        />
+        <ResponsiveContainer>
+          <Stack
+            initialRouteName="home"
+            screenOptions={{
+              headerShown: false,
+              contentStyle: {
+                backgroundColor: '#FFFFFF',
+              },
+            }}
+          />
+        </ResponsiveContainer>
       </View>
 
       <BottomMenu onOpenMenu={abrirMenu} />
