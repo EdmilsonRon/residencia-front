@@ -23,6 +23,7 @@ import { useTransacoes } from '../../contexts/TransacoesContext';
 import { useCategorias } from '../../contexts/CategoriasContext';
 
 export default function NovaTransacao() {
+
   const { adicionarTransacao } = useTransacoes();
 
   const { categorias, obterCategoriasPorTipo } = useCategorias();
@@ -32,17 +33,14 @@ export default function NovaTransacao() {
   const [valor, setValor] = useState('');
   const [categoria, setCategoria] = useState('Alimentação');
 
-  // Data selecionada no calendário
   const [data, setData] = useState(new Date());
 
-  // Controla a exibição do seletor de data
   const [mostrarSeletorData, setMostrarSeletorData] = useState(false);
 
   const categoriasDisponiveis = obterCategoriasPorTipo(tipo);
 
-  // Atualiza a categoria caso ela não esteja disponível
-  // para o tipo de transação selecionado
   useEffect(() => {
+
     const categoriaAindaDisponivel = categoriasDisponiveis.some(
       (item) => item.nome === categoria
     );
@@ -50,10 +48,11 @@ export default function NovaTransacao() {
     if (!categoriaAindaDisponivel) {
       setCategoria(categoriasDisponiveis[0]?.nome || '');
     }
+
   }, [tipo, categorias]);
 
-  // Converte a data para AAAA-MM-DD
   function formatarDataISO(dataEscolhida) {
+
     const ano = dataEscolhida.getFullYear();
 
     const mes = String(
@@ -67,13 +66,14 @@ export default function NovaTransacao() {
     return `${ano}-${mes}-${dia}`;
   }
 
-  // Converte a data para DD/MM/AAAA
   function formatarDataBrasileira(dataEscolhida) {
+
     return dataEscolhida.toLocaleDateString('pt-BR');
+
   }
 
-  // Evento de alteração da data
   function aoAlterarData(event, dataEscolhida) {
+
     if (Platform.OS === 'android') {
       setMostrarSeletorData(false);
     }
@@ -81,11 +81,29 @@ export default function NovaTransacao() {
     if (dataEscolhida) {
       setData(dataEscolhida);
     }
+
   }
 
-  // Salvar transação
+  function aoAlterarDataWeb(event) {
+
+    const valorData = event.target.value;
+
+    if (valorData) {
+
+      const [ano, mes, dia] = valorData
+        .split('-')
+        .map(Number);
+
+      setData(new Date(ano, mes - 1, dia));
+
+    }
+
+  }
+
   function salvarTransacao() {
+
     if (!descricao.trim()) {
+
       Alert.alert(
         'Descrição obrigatória',
         'Informe o nome da transação.'
@@ -95,6 +113,7 @@ export default function NovaTransacao() {
     }
 
     if (!categoria) {
+
       Alert.alert(
         'Categoria obrigatória',
         'Selecione uma categoria para a transação.'
@@ -112,6 +131,7 @@ export default function NovaTransacao() {
       !Number.isFinite(valorNumerico) ||
       valorNumerico <= 0
     ) {
+
       Alert.alert(
         'Valor inválido',
         'Digite um valor maior que zero.'
@@ -121,6 +141,7 @@ export default function NovaTransacao() {
     }
 
     const novaTransacao = {
+
       descricao: descricao.trim(),
 
       categoria,
@@ -145,38 +166,48 @@ export default function NovaTransacao() {
         tipo === 'Receita'
           ? '#238B45'
           : '#D92344',
+
     };
 
     adicionarTransacao(novaTransacao);
 
     router.replace('/transacoes');
+
   }
 
   return (
+
     <KeyboardAvoidingView
       style={estilos.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+
       <ScrollView
         contentContainerStyle={estilos.conteudo}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
 
+        {/* CABEÇALHO */}
+
         <View style={estilos.cabecalho}>
+
           <TouchableOpacity
             style={estilos.botaoVoltar}
             onPress={() => router.back()}
             accessibilityLabel="Voltar"
           >
+
             <Ionicons
               name="arrow-back"
               size={23}
               color="#252525"
             />
+
           </TouchableOpacity>
 
           <View style={estilos.titulosCabecalho}>
+
             <Text style={estilos.titulo}>
               Nova transação
             </Text>
@@ -184,15 +215,19 @@ export default function NovaTransacao() {
             <Text style={estilos.subtitulo}>
               Registre uma movimentação financeira
             </Text>
+
           </View>
+
         </View>
 
+        {/* TIPO DE TRANSAÇÃO */}
 
         <Text style={estilos.rotulo}>
           Tipo de transação
         </Text>
 
         <View style={estilos.seletorTipo}>
+
           <TouchableOpacity
             style={[
               estilos.botaoTipo,
@@ -201,6 +236,7 @@ export default function NovaTransacao() {
             onPress={() => setTipo('Despesa')}
             activeOpacity={0.8}
           >
+
             <Ionicons
               name="arrow-up-circle-outline"
               size={22}
@@ -215,6 +251,7 @@ export default function NovaTransacao() {
             >
               Despesa
             </Text>
+
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -225,6 +262,7 @@ export default function NovaTransacao() {
             onPress={() => setTipo('Receita')}
             activeOpacity={0.8}
           >
+
             <Ionicons
               name="arrow-down-circle-outline"
               size={22}
@@ -239,15 +277,19 @@ export default function NovaTransacao() {
             >
               Receita
             </Text>
+
           </TouchableOpacity>
+
         </View>
 
+        {/* VALOR */}
 
         <Text style={estilos.rotulo}>
           Valor
         </Text>
 
         <View style={estilos.campoValor}>
+
           <Text style={estilos.simboloMoeda}>
             R$
           </Text>
@@ -261,14 +303,17 @@ export default function NovaTransacao() {
             onChangeText={setValor}
             accessibilityLabel="Valor da transação"
           />
+
         </View>
 
+        {/* DESCRIÇÃO */}
 
         <Text style={estilos.rotulo}>
           Descrição
         </Text>
 
         <View style={estilos.campo}>
+
           <Ionicons
             name="document-text-outline"
             size={21}
@@ -285,18 +330,23 @@ export default function NovaTransacao() {
             returnKeyType="next"
             accessibilityLabel="Descrição"
           />
+
         </View>
 
+        {/* CATEGORIAS */}
 
         <Text style={estilos.rotulo}>
           Categoria
         </Text>
 
         <View style={estilos.categorias}>
+
           {categoriasDisponiveis.map((item) => {
+
             const selecionada = categoria === item.nome;
 
             return (
+
               <TouchableOpacity
                 key={item.id}
                 style={[
@@ -310,6 +360,7 @@ export default function NovaTransacao() {
                 onPress={() => setCategoria(item.nome)}
                 activeOpacity={0.8}
               >
+
                 <Ionicons
                   name={item.icone}
                   size={16}
@@ -327,17 +378,24 @@ export default function NovaTransacao() {
                 >
                   {item.nome}
                 </Text>
+
               </TouchableOpacity>
+
             );
+
           })}
 
           {categoriasDisponiveis.length === 0 && (
+
             <Text style={estilos.textoCategoria}>
               Nenhuma categoria disponível para esse tipo.
             </Text>
+
           )}
+
         </View>
 
+        {/* DATA */}
 
         <Text style={estilos.rotulo}>
           Data
@@ -348,6 +406,7 @@ export default function NovaTransacao() {
           onPress={() => setMostrarSeletorData(true)}
           activeOpacity={0.7}
         >
+
           <Ionicons
             name="calendar-outline"
             size={21}
@@ -363,19 +422,25 @@ export default function NovaTransacao() {
             size={18}
             color="#888888"
           />
+
         </TouchableOpacity>
 
 
         {Platform.OS === 'ios' && (
+
           <Modal
             visible={mostrarSeletorData}
             transparent
             animationType="slide"
             onRequestClose={() => setMostrarSeletorData(false)}
           >
+
             <View style={estilos.fundoModalData}>
+
               <View style={estilos.modalData}>
+
                 <View style={estilos.cabecalhoModalData}>
+
                   <Text style={estilos.tituloModalData}>
                     Selecionar data
                   </Text>
@@ -383,10 +448,13 @@ export default function NovaTransacao() {
                   <TouchableOpacity
                     onPress={() => setMostrarSeletorData(false)}
                   >
+
                     <Text style={estilos.botaoConcluirData}>
                       Concluir
                     </Text>
+
                   </TouchableOpacity>
+
                 </View>
 
                 <DateTimePicker
@@ -398,13 +466,19 @@ export default function NovaTransacao() {
                   minimumDate={new Date(1900, 0, 1)}
                   locale="pt-BR"
                 />
+
               </View>
+
             </View>
+
           </Modal>
+
         )}
 
+        {/* CALENDÁRIO ANDROID */}
 
         {Platform.OS === 'android' && mostrarSeletorData && (
+
           <DateTimePicker
             value={data}
             mode="date"
@@ -413,8 +487,55 @@ export default function NovaTransacao() {
             maximumDate={new Date(2100, 11, 31)}
             minimumDate={new Date(1900, 0, 1)}
           />
+
         )}
 
+        {/* CALENDÁRIO WEB / PC */}
+
+        {Platform.OS === 'web' && mostrarSeletorData && (
+
+          <View style={estilos.campoCalendarioWeb}>
+
+            <Text style={estilos.tituloModalData}>
+              Selecionar data
+            </Text>
+
+            <input
+              type="date"
+              value={formatarDataISO(data)}
+              onChange={aoAlterarDataWeb}
+              min="1900-01-01"
+              max="2100-12-31"
+              style={{
+                width: '100%',
+                height: 45,
+                padding: 10,
+                borderRadius: 10,
+                border: '1px solid #EAEAEA',
+                backgroundColor: '#FAFAFA',
+                fontSize: 14,
+                color: '#252525',
+                marginTop: 12,
+                boxSizing: 'border-box',
+              }}
+            />
+
+            <TouchableOpacity
+              style={estilos.botaoConcluirWeb}
+              onPress={() => setMostrarSeletorData(false)}
+            >
+
+              <Text style={estilos.botaoConcluirData}>
+                Concluir
+              </Text>
+
+            </TouchableOpacity>
+
+          </View>
+
+        )}
+
+        {/* SALVAR TRANSAÇÃO */}
 
         <TouchableOpacity
           style={[
@@ -424,6 +545,7 @@ export default function NovaTransacao() {
           onPress={salvarTransacao}
           activeOpacity={0.8}
         >
+
           <Ionicons
             name="checkmark-circle-outline"
             size={22}
@@ -433,22 +555,33 @@ export default function NovaTransacao() {
           <Text style={estilos.textoBotaoSalvar}>
             Salvar transação
           </Text>
+
         </TouchableOpacity>
+
+        {/* CANCELAR */}
 
         <TouchableOpacity
           style={estilos.botaoCancelar}
           onPress={() => router.back()}
         >
+
           <Text style={estilos.textoCancelar}>
             Cancelar
           </Text>
+
         </TouchableOpacity>
+
       </ScrollView>
+
     </KeyboardAvoidingView>
+
   );
+
 }
 
+
 const estilos = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
@@ -618,7 +751,6 @@ const estilos = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // DATA
 
   textoData: {
     flex: 1,
@@ -627,7 +759,6 @@ const estilos = StyleSheet.create({
     paddingVertical: 13,
   },
 
-  // MODAL DE DATA IOS
 
   fundoModalData: {
     flex: 1,
@@ -662,7 +793,22 @@ const estilos = StyleSheet.create({
     color: '#D92344',
   },
 
-  // BOTÃO SALVAR
+
+  campoCalendarioWeb: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
+    borderRadius: 14,
+    padding: 15,
+    marginBottom: 19,
+  },
+
+  botaoConcluirWeb: {
+    alignSelf: 'flex-end',
+    paddingTop: 15,
+    paddingHorizontal: 5,
+  },
+
 
   botaoSalvar: {
     minHeight: 55,
@@ -695,4 +841,5 @@ const estilos = StyleSheet.create({
     fontWeight: '700',
     color: '#777777',
   },
+
 });
