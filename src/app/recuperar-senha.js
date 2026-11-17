@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 import {
@@ -5,39 +6,68 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { useAuth } from '../contexts/AuthContext';
+
+import { StyleSheet } from 'react-native';
+
 export default function RecuperarSenha() {
+  const { usuarios, carregando } = useAuth();
+
   const [email, setEmail] = useState('');
   const [erro, setErro] = useState('');
-  const [solicitacaoEnviada, setSolicitacaoEnviada] = useState(false);
+  const [enviando, setEnviando] = useState(false);
 
   function solicitarRecuperacao() {
-    const emailLimpo = email.trim();
+    if (enviando || carregando) {
+      return;
+    }
+
+    const emailLimpo = email.trim().toLowerCase();
 
     if (!emailLimpo) {
       setErro('Digite seu e-mail para continuar.');
       return;
     }
 
-    const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      emailLimpo
+    );
 
-    if (!formatoEmail.test(emailLimpo)) {
+    if (!formatoEmail) {
       setErro('Digite um endereço de e-mail válido.');
       return;
     }
 
     setErro('');
-    
-    setSolicitacaoEnviada(true);
+    setEnviando(true);
+
+    const usuarioEncontrado = usuarios.find(
+      (usuario) => usuario.email.toLowerCase() === emailLimpo
+    );
+
+    setEnviando(false);
+
+    if (!usuarioEncontrado) {
+      setErro('Não encontramos uma conta cadastrada com esse e-mail.');
+      return;
+    }
+
+    router.push({
+      pathname: '/nova-senha',
+      params: {
+        email: emailLimpo,
+      },
+    });
   }
 
   return (
@@ -58,7 +88,11 @@ export default function RecuperarSenha() {
           accessibilityRole="button"
           accessibilityLabel="Voltar para o login"
         >
-          <Ionicons name="arrow-back" size={23} color="#252525" />
+          <Ionicons
+            name="arrow-back"
+            size={23}
+            color="#252525"
+          />
         </TouchableOpacity>
 
         <View style={estilos.cabecalho}>
@@ -75,128 +109,109 @@ export default function RecuperarSenha() {
           </Text>
         </View>
 
-        {!solicitacaoEnviada ? (
-          <View style={estilos.formulario}>
-            <Text style={estilos.titulo}>
-              Esqueceu sua senha?
-            </Text>
+        <View style={estilos.formulario}>
+          <Text style={estilos.titulo}>
+            Esqueceu sua senha?
+          </Text>
 
-            <Text style={estilos.descricao}>
-              Não se preocupe! Informe o e-mail associado à sua
-              conta e enviaremos instruções para criar uma nova senha.
-            </Text>
+          <Text style={estilos.descricao}>
+            Informe o e-mail utilizado no cadastro para continuar
+            com a recuperação da sua conta.
+          </Text>
 
-            <Text style={estilos.rotulo}>
-              E-mail
-            </Text>
+          <Text style={estilos.rotulo}>
+            E-mail cadastrado
+          </Text>
 
-            <View style={estilos.campo}>
-              <Ionicons
-                name="mail-outline"
-                size={21}
-                color="#888888"
-              />
+          <View style={estilos.campo}>
+            <Ionicons
+              name="mail-outline"
+              size={21}
+              color="#888888"
+            />
 
-              <TextInput
-                style={estilos.input}
-                placeholder="Digite seu e-mail"
-                placeholderTextColor="#999999"
-                value={email}
-                onChangeText={(texto) => {
-                  setEmail(texto);
-                  setErro('');
-                }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-                accessibilityLabel="E-mail"
-                returnKeyType="send"
-                onSubmitEditing={solicitarRecuperacao}
-              />
-            </View>
-
-            {erro !== '' && (
-              <View style={estilos.areaErro}>
-                <Ionicons
-                  name="alert-circle-outline"
-                  size={18}
-                  color="#D92344"
-                />
-
-                <Text style={estilos.textoErro}>
-                  {erro}
-                </Text>
-              </View>
-            )}
-
-            <TouchableOpacity
-              style={estilos.botaoPrincipal}
-              activeOpacity={0.8}
-              onPress={solicitarRecuperacao}
-            >
-              <Text style={estilos.textoBotaoPrincipal}>
-                Enviar instruções
-              </Text>
-
-              <Ionicons
-                name="mail-outline"
-                size={20}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={estilos.botaoSecundario}
-              onPress={() => router.replace('/login')}
-            >
-              <Text style={estilos.textoBotaoSecundario}>
-                Voltar para o login
-              </Text>
-            </TouchableOpacity>
+            <TextInput
+              style={estilos.input}
+              placeholder="Digite seu e-mail"
+              placeholderTextColor="#999999"
+              value={email}
+              onChangeText={(texto) => {
+                setEmail(texto);
+                setErro('');
+              }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              accessibilityLabel="E-mail cadastrado"
+              returnKeyType="send"
+              onSubmitEditing={solicitarRecuperacao}
+            />
           </View>
-        ) : (
-          <View style={estilos.formulario}>
-            <View style={estilos.iconeSucesso}>
+
+          {erro !== '' && (
+            <View style={estilos.areaErro}>
               <Ionicons
-                name="checkmark-circle-outline"
-                size={55}
-                color="#238B45"
+                name="alert-circle-outline"
+                size={18}
+                color="#D92344"
               />
+
+              <Text style={estilos.textoErro}>
+                {erro}
+              </Text>
             </View>
+          )}
 
-            <Text style={estilos.tituloCentralizado}>
-              Solicitação registrada!
-            </Text>
+          <TouchableOpacity
+            style={[
+              estilos.botaoPrincipal,
+              (enviando || carregando) && estilos.botaoDesabilitado,
+            ]}
+            activeOpacity={0.8}
+            onPress={solicitarRecuperacao}
+            disabled={enviando || carregando}
+          >
+            {carregando || enviando ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <>
+                <Text style={estilos.textoBotaoPrincipal}>
+                  Continuar
+                </Text>
 
-            <Text style={estilos.descricaoCentralizada}>
-              Se houver uma conta associada ao e-mail informado,
-              você receberá instruções para redefinir sua senha.
-              Verifique sua caixa de entrada e a pasta de spam.
+                <Ionicons
+                  name="arrow-forward"
+                  size={20}
+                  color="#FFFFFF"
+                />
+              </>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={estilos.botaoSecundario}
+            onPress={() => router.replace('/login')}
+          >
+            <Text style={estilos.textoBotaoSecundario}>
+              Voltar para o login
             </Text>
+          </TouchableOpacity>
+
+          <View style={estilos.avisoContainer}>
+            <Ionicons
+              name="information-circle-outline"
+              size={19}
+              color="#946200"
+            />
 
             <Text style={estilos.aviso}>
-              No momento, o envio real de e-mails ainda não está
-              conectado ao aplicativo.
+              A recuperação está funcionando localmente. O envio
+              de e-mail será implementado quando o backend estiver
+              disponível.
             </Text>
-
-            <TouchableOpacity
-              style={estilos.botaoPrincipal}
-              activeOpacity={0.8}
-              onPress={() => router.replace('/login')}
-            >
-              <Text style={estilos.textoBotaoPrincipal}>
-                Voltar para o login
-              </Text>
-
-              <Ionicons
-                name="arrow-forward"
-                size={20}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
           </View>
-        )}
+        </View>
 
         <Text style={estilos.rodape}>
           Suas finanças, organizadas em um só lugar.
@@ -260,28 +275,12 @@ const estilos = StyleSheet.create({
     color: '#252525',
   },
 
-  tituloCentralizado: {
-    fontSize: 25,
-    fontWeight: '700',
-    color: '#252525',
-    textAlign: 'center',
-  },
-
   descricao: {
     fontSize: 14,
     lineHeight: 22,
     color: '#777777',
     marginTop: 12,
     marginBottom: 20,
-  },
-
-  descricaoCentralizada: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: '#777777',
-    marginTop: 14,
-    marginBottom: 20,
-    textAlign: 'center',
   },
 
   rotulo: {
@@ -336,6 +335,10 @@ const estilos = StyleSheet.create({
     gap: 10,
   },
 
+  botaoDesabilitado: {
+    opacity: 0.6,
+  },
+
   textoBotaoPrincipal: {
     fontSize: 15,
     fontWeight: '700',
@@ -354,18 +357,21 @@ const estilos = StyleSheet.create({
     color: '#D92344',
   },
 
-  iconeSucesso: {
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-
-  aviso: {
-    fontSize: 12,
-    lineHeight: 19,
-    color: '#946200',
+  avisoContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 9,
     backgroundColor: '#FFF4CC',
     borderRadius: 10,
     padding: 12,
+    marginTop: 22,
+  },
+
+  aviso: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 19,
+    color: '#946200',
   },
 
   rodape: {

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 
 import {
@@ -5,17 +6,26 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { useAuth } from '../contexts/AuthContext';
+
 export default function NovaSenha() {
+  const { email } = useLocalSearchParams();
+
+  const { alterarSenha, carregando } = useAuth();
+
+  const emailConta = Array.isArray(email) ? email[0] : email;
+
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
 
@@ -24,22 +34,47 @@ export default function NovaSenha() {
 
   const [erro, setErro] = useState('');
   const [senhaAlterada, setSenhaAlterada] = useState(false);
+  const [salvando, setSalvando] = useState(false);
 
-  function salvarNovaSenha() {
+  async function salvarNovaSenha() {
+    if (salvando || carregando) {
+      return;
+    }
+
+    if (!emailConta) {
+      setErro('Não foi possível identificar sua conta. Solicite a recuperação novamente.');
+      return;
+    }
+
     if (!senha || !confirmarSenha) {
       setErro('Preencha os dois campos de senha.');
       return;
     }
+
     if (senha.length < 8) {
       setErro('A nova senha deve ter pelo menos 8 caracteres.');
       return;
     }
+
     if (senha !== confirmarSenha) {
       setErro('As senhas não são iguais. Verifique os campos.');
       return;
     }
-    setErro('');
-    setSenhaAlterada(true);
+
+    try {
+      setErro('');
+      setSalvando(true);
+
+      await alterarSenha(emailConta, senha);
+
+      setSenhaAlterada(true);
+    } catch (erroAlteracao) {
+      setErro(
+        erroAlteracao.message || 'Não foi possível alterar sua senha.'
+      );
+    } finally {
+      setSalvando(false);
+    }
   }
 
   return (
@@ -60,7 +95,11 @@ export default function NovaSenha() {
           accessibilityRole="button"
           accessibilityLabel="Voltar para o login"
         >
-          <Ionicons name="arrow-back" size={23} color="#252525" />
+          <Ionicons
+            name="arrow-back"
+            size={23}
+            color="#252525"
+          />
         </TouchableOpacity>
 
         <View style={estilos.cabecalho}>
@@ -87,6 +126,18 @@ export default function NovaSenha() {
               Escolha uma nova senha para sua conta. Ela deverá
               ter pelo menos 8 caracteres.
             </Text>
+
+            <View style={estilos.contaContainer}>
+              <Ionicons
+                name="mail-outline"
+                size={18}
+                color="#777777"
+              />
+
+              <Text style={estilos.emailConta}>
+                {emailConta || 'E-mail não identificado'}
+              </Text>
+            </View>
 
             <Text style={estilos.rotulo}>
               Nova senha
@@ -196,23 +247,34 @@ export default function NovaSenha() {
             )}
 
             <TouchableOpacity
-              style={estilos.botaoPrincipal}
+              style={[
+                estilos.botaoPrincipal,
+                salvando && estilos.botaoDesabilitado,
+              ]}
               activeOpacity={0.8}
               onPress={salvarNovaSenha}
+              disabled={salvando || carregando}
             >
-              <Text style={estilos.textoBotaoPrincipal}>
-                Salvar nova senha
-              </Text>
+              {salvando || carregando ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <>
+                  <Text style={estilos.textoBotaoPrincipal}>
+                    Salvar nova senha
+                  </Text>
 
-              <Ionicons
-                name="checkmark"
-                size={21}
-                color="#FFFFFF"
-              />
+                  <Ionicons
+                    name="checkmark"
+                    size={21}
+                    color="#FFFFFF"
+                  />
+                </>
+              )}
             </TouchableOpacity>
 
             <Text style={estilos.aviso}>
-              A alteração real da senha só quando integrar o back, só ilustrativo.
+              Esta alteração atualiza a senha armazenada localmente.
+              A validação por e-mail será adicionada com o backend.
             </Text>
           </View>
         ) : (
@@ -220,21 +282,18 @@ export default function NovaSenha() {
             <View style={estilos.iconeSucesso}>
               <Ionicons
                 name="checkmark-circle-outline"
-                size={55}
+                size={65}
                 color="#238B45"
               />
             </View>
 
             <Text style={estilos.tituloCentralizado}>
-              Tudo pronto!
+              Senha alterada!
             </Text>
 
             <Text style={estilos.descricaoCentralizada}>
-              As senhas foram validadas.
-            </Text>
-
-            <Text style={estilos.aviso}>
-              A senha foi alterada com susesso.
+              Sua nova senha foi salva com sucesso. Agora você
+              pode entrar na sua conta utilizando a nova senha.
             </Text>
 
             <TouchableOpacity
@@ -341,6 +400,22 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
   },
 
+  contaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F6F6F6',
+    borderRadius: 10,
+    padding: 13,
+    gap: 9,
+    marginBottom: 12,
+  },
+
+  emailConta: {
+    flex: 1,
+    fontSize: 13,
+    color: '#555555',
+  },
+
   rotulo: {
     fontSize: 14,
     fontWeight: '600',
@@ -393,6 +468,10 @@ const estilos = StyleSheet.create({
     gap: 10,
   },
 
+  botaoDesabilitado: {
+    opacity: 0.6,
+  },
+
   textoBotaoPrincipal: {
     fontSize: 15,
     fontWeight: '700',
@@ -412,12 +491,6 @@ const estilos = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginTop: 20,
-  },
-
-  textoBotaoSecundario: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#D92344',
   },
 
   rodape: {

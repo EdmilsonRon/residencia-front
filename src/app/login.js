@@ -1,11 +1,13 @@
+
 import React, { useState } from 'react';
+
 import estilos from '../../src/styles/loginStyles';
+
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -15,22 +17,29 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { useAuth } from '../contexts/AuthContext';
+
 export default function Login() {
+  const { fazerLogin, carregando } = useAuth();
+
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState('');
+  const [entrando, setEntrando] = useState(false);
 
-  function entrar() {
+  async function entrar() {
+    if (entrando || carregando) {
+      return;
+    }
+
     const emailLimpo = email.trim();
 
-    // Verifica se os campos foram preenchidos.
     if (!emailLimpo || !senha) {
       setErro('Preencha o e-mail e a senha para continuar.');
       return;
     }
 
-    // Verifica o email
     const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formatoEmail.test(emailLimpo)) {
@@ -42,9 +51,21 @@ export default function Login() {
       setErro('A senha deve ter pelo menos 8 caracteres.');
       return;
     }
-    setErro('');
 
-    router.replace('/home');
+    try {
+      setErro('');
+      setEntrando(true);
+
+      await fazerLogin(emailLimpo, senha);
+
+      router.replace('/home');
+    } catch (erroLogin) {
+      setErro(
+        erroLogin.message || 'Não foi possível entrar na sua conta.'
+      );
+    } finally {
+      setEntrando(false);
+    }
   }
 
   function abrirCadastro() {
@@ -63,6 +84,7 @@ export default function Login() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+
         <View style={estilos.cabecalho}>
           <View style={estilos.logo}>
             <Ionicons
@@ -165,7 +187,11 @@ export default function Login() {
               }
             >
               <Ionicons
-                name={mostrarSenha ? 'eye-off-outline' : 'eye-outline'}
+                name={
+                  mostrarSenha
+                    ? 'eye-off-outline'
+                    : 'eye-outline'
+                }
                 size={21}
                 color="#888888"
               />
@@ -199,16 +225,19 @@ export default function Login() {
             style={estilos.botaoEntrar}
             activeOpacity={0.8}
             onPress={entrar}
+            disabled={entrando || carregando}
           >
             <Text style={estilos.textoBotaoEntrar}>
-              Entrar
+              {entrando ? 'Entrando...' : 'Entrar'}
             </Text>
 
-            <Ionicons
-              name="arrow-forward"
-              size={20}
-              color="#FFFFFF"
-            />
+            {!entrando && (
+              <Ionicons
+                name="arrow-forward"
+                size={20}
+                color="#FFFFFF"
+              />
+            )}
           </TouchableOpacity>
 
           <View style={estilos.areaCadastro}>
@@ -227,8 +256,8 @@ export default function Login() {
         <Text style={estilos.rodape}>
           Suas finanças, organizadas em um só lugar.
         </Text>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-

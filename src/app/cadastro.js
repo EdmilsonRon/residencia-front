@@ -1,11 +1,13 @@
+
 import React, { useState } from 'react';
+
 import estilos from '../../src/styles/cadastroStyles';
+
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -16,7 +18,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { useAuth } from '../contexts/AuthContext';
+
 export default function Cadastro() {
+  const { cadastrarUsuario, carregando } = useAuth();
+
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -25,8 +31,14 @@ export default function Cadastro() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmacao, setMostrarConfirmacao] = useState(false);
   const [aceitouTermos, setAceitouTermos] = useState(false);
+  const [cadastrando, setCadastrando] = useState(false);
+  const [telefone, setTelefone] = useState('');
 
-  function cadastrar() {
+  async function cadastrar() {
+    if (cadastrando || carregando) {
+      return;
+    }
+
     if (
       !nome.trim() ||
       !email.trim() ||
@@ -76,16 +88,36 @@ export default function Cadastro() {
       return;
     }
 
-    Alert.alert(
-      'Cadastro validado!',
-      'Os dados foram validados.',
-      [
-        {
-          text: 'Ir para o login',
-          onPress: () => router.replace('/login'),
-        },
-      ]  
-    );
+    try {
+      setCadastrando(true);
+
+      await cadastrarUsuario({
+        nome: nome.trim(),
+        email: email.trim().toLowerCase(),
+        telefone: telefone.trim(),
+        senha: senha,
+      });
+
+      Alert.alert(
+        'Cadastro realizado!',
+        'Sua conta foi criada com sucesso. Entre utilizando o e-mail e a senha cadastrados.',
+        [
+          {
+            text: 'Ir para o login',
+            onPress: () => {
+              router.replace('/login');
+            },
+          },
+        ]
+      );
+    } catch (erro) {
+      Alert.alert(
+        'Erro no cadastro',
+        erro.message || 'Não foi possível criar sua conta.'
+      );
+    } finally {
+      setCadastrando(false);
+    }
   }
 
   function voltarParaLogin() {
@@ -123,7 +155,6 @@ export default function Cadastro() {
           </Text>
         </View>
 
-
         <View style={estilos.formulario}>
           <Text style={estilos.titulo}>
             Crie sua conta
@@ -132,7 +163,6 @@ export default function Cadastro() {
           <Text style={estilos.descricao}>
             Preencha seus dados para começar.
           </Text>
-
 
           <Text style={estilos.rotulo}>
             Nome completo
@@ -159,7 +189,6 @@ export default function Cadastro() {
             />
           </View>
 
-
           <Text style={estilos.rotulo}>
             E-mail
           </Text>
@@ -185,6 +214,31 @@ export default function Cadastro() {
               returnKeyType="next"
             />
           </View>
+
+          <Text style={estilos.rotulo}>
+  Telefone
+</Text>
+
+<View style={estilos.campo}>
+  <Ionicons
+    name="call-outline"
+    size={21}
+    color="#888888"
+  />
+
+  <TextInput
+    style={estilos.input}
+    placeholder="Digite seu telefone"
+    placeholderTextColor="#999999"
+    value={telefone}
+    onChangeText={setTelefone}
+    keyboardType="phone-pad"
+    maxLength={15}
+    autoComplete="tel"
+    accessibilityLabel="Telefone"
+    returnKeyType="next"
+  />
+</View>
 
 
           <Text style={estilos.rotulo}>
@@ -230,7 +284,6 @@ export default function Cadastro() {
             </TouchableOpacity>
           </View>
 
-
           <Text style={estilos.rotulo}>
             Confirmar senha
           </Text>
@@ -253,6 +306,7 @@ export default function Cadastro() {
               autoComplete="new-password"
               accessibilityLabel="Confirmar senha"
               returnKeyType="done"
+              onSubmitEditing={cadastrar}
             />
 
             <TouchableOpacity
@@ -277,7 +331,6 @@ export default function Cadastro() {
               />
             </TouchableOpacity>
           </View>
-
 
           <TouchableOpacity
             style={estilos.areaTermos}
@@ -306,23 +359,24 @@ export default function Cadastro() {
             </Text>
           </TouchableOpacity>
 
-
           <TouchableOpacity
             style={estilos.botaoCadastrar}
             activeOpacity={0.8}
             onPress={cadastrar}
+            disabled={cadastrando || carregando}
           >
             <Text style={estilos.textoBotaoCadastrar}>
-              Criar minha conta
+              {cadastrando ? 'Criando conta...' : 'Criar minha conta'}
             </Text>
 
-            <Ionicons
-              name="arrow-forward"
-              size={20}
-              color="#FFFFFF"
-            />
+            {!cadastrando && (
+              <Ionicons
+                name="arrow-forward"
+                size={20}
+                color="#FFFFFF"
+              />
+            )}
           </TouchableOpacity>
-
 
           <View style={estilos.areaLogin}>
             <Text style={estilos.textoLogin}>
@@ -340,6 +394,7 @@ export default function Cadastro() {
         <Text style={estilos.rodape}>
           Suas finanças, organizadas em um só lugar.
         </Text>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
