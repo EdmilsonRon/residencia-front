@@ -35,7 +35,7 @@ export default function NovaTransacao() {
   const [tipo, setTipo] = useState('Despesa');
   const [descricao, setDescricao] = useState('');
   const [valor, setValor] = useState('');
-  const [categoria, setCategoria] = useState('Alimentação');
+  const [categoria, setCategoria] = useState('');
   const [data, setData] = useState(new Date());
   const [mostrarSeletorData, setMostrarSeletorData] = useState(false);
 
@@ -50,8 +50,8 @@ export default function NovaTransacao() {
       (item) => item.nome === categoria
     );
 
-    if (!disponivel) {
-      setCategoria(categoriasDisponiveis[0]?.nome || '');
+    if (categoria && !disponivel) {
+      setCategoria('');
     }
   }, [tipo, categorias]);
 
@@ -133,14 +133,6 @@ export default function NovaTransacao() {
       return;
     }
 
-    if (!categoria) {
-      Alert.alert(
-        'Categoria obrigatória',
-        'Selecione uma categoria.'
-      );
-      return;
-    }
-
     const valorNumerico = converterValor(valor);
 
     if (
@@ -176,7 +168,7 @@ export default function NovaTransacao() {
 
     const dados = {
       descricao: descricao.trim(),
-      categoria,
+      categoria: categoria || null,
       data: formatarDataISO(data),
       valor: valorNumerico,
       tipo,
@@ -402,6 +394,29 @@ export default function NovaTransacao() {
         </Text>
 
         <View style={estilos.categorias}>
+          <TouchableOpacity
+            style={[
+              estilos.botaoCategoria,
+              estilos.botaoSemCategoria,
+              !categoria && estilos.botaoSemCategoriaAtivo,
+            ]}
+            onPress={() => setCategoria('')}
+          >
+            <Ionicons
+              name="ban-outline"
+              size={16}
+              color={!categoria ? '#555555' : '#888888'}
+            />
+            <Text
+              style={[
+                estilos.textoCategoria,
+                !categoria && estilos.textoSemCategoriaAtivo,
+              ]}
+            >
+              Sem categoria
+            </Text>
+          </TouchableOpacity>
+
           {categoriasDisponiveis.map((item) => {
             const selecionada = categoria === item.nome;
 
@@ -440,10 +455,17 @@ export default function NovaTransacao() {
 
           {categoriasDisponiveis.length === 0 && (
             <Text style={estilos.textoCategoria}>
-              Nenhuma categoria disponível.
+              Nenhuma categoria cadastrada para este tipo.
             </Text>
           )}
         </View>
+
+        {!categoria && (
+          <Text style={estilos.ajudaSemCategoria}>
+            Esta transação será salva sem categoria e contará como não
+            categorizada na sua Saúde Financeira.
+          </Text>
+        )}
 
         <Text style={estilos.rotulo}>
           Data do primeiro lançamento
@@ -815,6 +837,25 @@ const estilos = StyleSheet.create({
     fontSize: 12,
     color: '#666666',
     fontWeight: '600',
+  },
+  botaoSemCategoria: {
+    backgroundColor: '#F7F7F7',
+    borderColor: '#DDDDDD',
+  },
+  botaoSemCategoriaAtivo: {
+    backgroundColor: '#EEEEEE',
+    borderColor: '#777777',
+  },
+  textoSemCategoriaAtivo: {
+    color: '#444444',
+    fontWeight: '800',
+  },
+  ajudaSemCategoria: {
+    color: '#888888',
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: -12,
+    marginBottom: 18,
   },
   textoData: {
     flex: 1,
