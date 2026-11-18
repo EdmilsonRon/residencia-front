@@ -1,6 +1,16 @@
-import React, { createContext, useContext, useState } from 'react';
+
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from 'react';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CategoriasContext = createContext(null);
+
+const CHAVE_CATEGORIAS = '@categorias';
 
 const categoriasIniciais = [
   {
@@ -95,6 +105,46 @@ const categoriasIniciais = [
 
 export function CategoriasProvider({ children }) {
   const [categorias, setCategorias] = useState(categoriasIniciais);
+  const [carregado, setCarregado] = useState(false);
+
+  // Recupera as categorias salvas.
+  useEffect(() => {
+    async function carregarCategorias() {
+      try {
+        const dadosSalvos = await AsyncStorage.getItem(
+          CHAVE_CATEGORIAS
+        );
+
+        if (dadosSalvos !== null) {
+          setCategorias(JSON.parse(dadosSalvos));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+      } finally {
+        setCarregado(true);
+      }
+    }
+
+    carregarCategorias();
+  }, []);
+
+  // Salva automaticamente as alterações.
+  useEffect(() => {
+    async function salvarCategorias() {
+      try {
+        await AsyncStorage.setItem(
+          CHAVE_CATEGORIAS,
+          JSON.stringify(categorias)
+        );
+      } catch (error) {
+        console.error('Erro ao salvar categorias:', error);
+      }
+    }
+
+    if (carregado) {
+      salvarCategorias();
+    }
+  }, [categorias, carregado]);
 
   // Mantém "Outros" sempre no final da lista.
   function ordenarCategorias(lista) {

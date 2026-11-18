@@ -3,12 +3,55 @@ import React, {
   createContext,
   useContext,
   useState,
+  useEffect,
 } from 'react';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MetasContext = createContext(null);
 
+const CHAVE_METAS = '@metas';
+
 export function MetasProvider({ children }) {
   const [metas, setMetas] = useState([]);
+  const [carregado, setCarregado] = useState(false);
+
+  // Recupera as metas salvas.
+  useEffect(() => {
+    async function carregarMetas() {
+      try {
+        const dadosSalvos = await AsyncStorage.getItem(CHAVE_METAS);
+
+        if (dadosSalvos !== null) {
+          setMetas(JSON.parse(dadosSalvos));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar metas:', error);
+      } finally {
+        setCarregado(true);
+      }
+    }
+
+    carregarMetas();
+  }, []);
+
+  // Salva automaticamente as alterações.
+  useEffect(() => {
+    async function salvarMetas() {
+      try {
+        await AsyncStorage.setItem(
+          CHAVE_METAS,
+          JSON.stringify(metas)
+        );
+      } catch (error) {
+        console.error('Erro ao salvar metas:', error);
+      }
+    }
+
+    if (carregado) {
+      salvarMetas();
+    }
+  }, [metas, carregado]);
 
   function adicionarMeta(novaMeta) {
     const metaCriada = {
@@ -34,30 +77,15 @@ export function MetasProvider({ children }) {
     );
   }
 
-  async function excluirMeta(id) {
-  try {
-    const novasMetas = metas.filter(
-      (meta) => meta.id !== id
-    );
-
-    setMetas(novasMetas);
-
-    await AsyncStorage.setItem(
-      '@metas',
-      JSON.stringify(novasMetas)
+  function excluirMeta(id) {
+    setMetas(atuais =>
+      atuais.filter(meta => meta.id !== id)
     );
 
     return {
       sucesso: true,
     };
-  } catch (error) {
-    console.error('Erro ao excluir meta:', error);
-
-    return {
-      sucesso: false,
-    };
   }
-}
 
   return (
     <MetasContext.Provider
