@@ -1,6 +1,5 @@
-
-import React, { useMemo, useState } from 'react';
-
+import React, { useMemo, useState, useEffect } from 'react';
+ 
 import {
   View,
   Text,
@@ -13,25 +12,33 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-
+ 
 import { useTransacoes } from '../../contexts/TransacoesContext';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-
+ 
 export default function Transacoes() {
   const [filtroAtivo, setFiltroAtivo] = useState('Todas');
   const [busca, setBusca] = useState('');
   const [mostrarArquivadas, setMostrarArquivadas] = useState(false);
-
+  const [paginaAtiva, setPaginaAtiva] = useState(1);
+  const [paginaArquivadas, setPaginaArquivadas] = useState(1);
+  const ITENS_POR_PAGINA = 20;
+ 
+  useEffect(() => {
+    setPaginaAtiva(1);
+    setPaginaArquivadas(1);
+  }, [busca, filtroAtivo]);
+ 
   const [lancamentoSelecionado, setLancamentoSelecionado] = useState(null);
   const [mostrarOpcoes, setMostrarOpcoes] = useState(false);
   const [mostrarEdicao, setMostrarEdicao] = useState(false);
-
+ 
   const [escopoEdicao, setEscopoEdicao] = useState('unico');
   const [descricaoEdicao, setDescricaoEdicao] = useState('');
   const [categoriaEdicao, setCategoriaEdicao] = useState('');
   const [valorEdicao, setValorEdicao] = useState('');
-
+ 
   const {
     transacoes,
     lancamentosPendentes,
@@ -43,47 +50,47 @@ export default function Transacoes() {
     restaurarTransacao,
     carregado,
   } = useTransacoes();
-
+ 
   function obterDataHoje() {
     const hoje = new Date();
-
+ 
     const ano = hoje.getFullYear();
     const mes = String(hoje.getMonth() + 1).padStart(2, '0');
     const dia = String(hoje.getDate()).padStart(2, '0');
-
+ 
     return `${ano}-${mes}-${dia}`;
   }
-
+ 
   const hoje = obterDataHoje();
-
+ 
   function formatarMoeda(valor) {
     return Number(valor || 0).toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     });
   }
-
+ 
   function formatarData(data) {
     if (!data) return '';
-
+ 
     const [ano, mes, dia] = data.split('-');
-
+ 
     const meses = [
       'jan.', 'fev.', 'mar.', 'abr.',
       'mai.', 'jun.', 'jul.', 'ago.',
       'set.', 'out.', 'nov.', 'dez.',
     ];
-
+ 
     return `${dia} ${meses[Number(mes) - 1]} ${ano}`;
   }
-
+ 
   function obterSituacao(item) {
     if (item.data < hoje) return 'Atrasado';
     if (item.data === hoje) return 'Disponível hoje';
-
+ 
     return 'Agendado';
   }
-
+ 
   /*
    * IMPORTANTE:
    * O saldo considera TODAS as transações.
@@ -92,91 +99,91 @@ export default function Transacoes() {
   const totalReceitas = transacoes
     .filter((item) => item.tipo === 'Receita')
     .reduce((total, item) => total + Number(item.valor), 0);
-
+ 
   const totalDespesas = transacoes
     .filter((item) => item.tipo === 'Despesa')
     .reduce((total, item) => total + Number(item.valor), 0);
-
+ 
   const saldoPeriodo = totalReceitas - totalDespesas;
-
+ 
   const transacoesAtivas = useMemo(
     () => transacoes.filter((item) => !item.arquivada),
     [transacoes]
   );
-
+ 
   const transacoesArquivadas = useMemo(
     () => transacoes.filter((item) => item.arquivada),
     [transacoes]
   );
-
+ 
   const transacoesFiltradas = useMemo(() => {
     const textoBusca = busca.trim().toLowerCase();
-
+ 
     return transacoesAtivas
       .filter((item) => {
         const correspondeAoFiltro =
           filtroAtivo === 'Todas' ||
           item.tipo === filtroAtivo;
-
+ 
         const correspondeABusca =
           (item.descricao || '').toLowerCase().includes(textoBusca) ||
           (item.categoria || '').toLowerCase().includes(textoBusca);
-
+ 
         return correspondeAoFiltro && correspondeABusca;
       })
       .sort((a, b) => b.data.localeCompare(a.data));
   }, [transacoesAtivas, filtroAtivo, busca]);
-
+ 
   const arquivadasFiltradas = useMemo(() => {
     const textoBusca = busca.trim().toLowerCase();
-
+ 
     return transacoesArquivadas
       .filter((item) => {
         const correspondeAoFiltro =
           filtroAtivo === 'Todas' ||
           item.tipo === filtroAtivo;
-
+ 
         const correspondeABusca =
           (item.descricao || '').toLowerCase().includes(textoBusca) ||
           (item.categoria || '').toLowerCase().includes(textoBusca);
-
+ 
         return correspondeAoFiltro && correspondeABusca;
       })
       .sort((a, b) => b.data.localeCompare(a.data));
   }, [transacoesArquivadas, filtroAtivo, busca]);
-
+ 
   const pendentesFiltrados = useMemo(() => {
     const textoBusca = busca.trim().toLowerCase();
-
+ 
     return lancamentosPendentes
       .filter((item) => {
         const correspondeAoFiltro =
           filtroAtivo === 'Todas' ||
           item.tipo === filtroAtivo;
-
+ 
         const correspondeABusca =
           (item.descricao || '').toLowerCase().includes(textoBusca) ||
           (item.categoria || '').toLowerCase().includes(textoBusca);
-
+ 
         return correspondeAoFiltro && correspondeABusca;
       })
       .sort((a, b) => a.data.localeCompare(b.data));
   }, [lancamentosPendentes, filtroAtivo, busca]);
-
+ 
   function abrirNovaTransacao() {
     router.push('/nova-transacao');
   }
-
+ 
   function confirmar(item) {
     if (item.data > hoje) {
       Alert.alert(
         'Lançamento futuro',
         `Esse lançamento está programado para ${formatarData(item.data)}. Você poderá confirmá-lo nessa data.`
       );
-
+ 
       return;
     }
-
+ 
     Alert.alert(
       'Confirmar lançamento',
       `Deseja confirmar "${item.descricao}" no valor de ${formatarMoeda(item.valor)}?`,
@@ -189,7 +196,7 @@ export default function Transacoes() {
           text: 'Confirmar',
           onPress: () => {
             const sucesso = confirmarLancamento(item.id);
-
+ 
             if (!sucesso) {
               Alert.alert(
                 'Não foi possível confirmar',
@@ -201,43 +208,43 @@ export default function Transacoes() {
       ]
     );
   }
-
+ 
   function abrirOpcoes(item) {
     setLancamentoSelecionado(item);
     setMostrarOpcoes(true);
   }
-
+ 
   function abrirEdicao(escopo) {
     if (!lancamentoSelecionado) return;
-
+ 
     setEscopoEdicao(escopo);
     setDescricaoEdicao(lancamentoSelecionado.descricao || '');
     setCategoriaEdicao(lancamentoSelecionado.categoria || '');
     setValorEdicao(
       String(lancamentoSelecionado.valor || '').replace('.', ',')
     );
-
+ 
     setMostrarOpcoes(false);
     setMostrarEdicao(true);
   }
-
+ 
   function converterValor(valorDigitado) {
     let normalizado = valorDigitado.trim().replace(/\s/g, '');
-
+ 
     if (normalizado.includes(',')) {
       normalizado = normalizado
         .replace(/\./g, '')
         .replace(',', '.');
     }
-
+ 
     return Number(normalizado);
   }
-
+ 
   function salvarEdicao() {
     if (!lancamentoSelecionado) return;
-
+ 
     const valorNumerico = converterValor(valorEdicao);
-
+ 
     if (!descricaoEdicao.trim()) {
       Alert.alert(
         'Descrição obrigatória',
@@ -245,7 +252,7 @@ export default function Transacoes() {
       );
       return;
     }
-
+ 
     if (!categoriaEdicao.trim()) {
       Alert.alert(
         'Categoria obrigatória',
@@ -253,7 +260,7 @@ export default function Transacoes() {
       );
       return;
     }
-
+ 
     if (
       !Number.isFinite(valorNumerico) ||
       valorNumerico <= 0
@@ -264,7 +271,7 @@ export default function Transacoes() {
       );
       return;
     }
-
+ 
     const sucesso = editarLancamento(
       lancamentoSelecionado.id,
       {
@@ -274,7 +281,7 @@ export default function Transacoes() {
       },
       escopoEdicao
     );
-
+ 
     if (!sucesso) {
       Alert.alert(
         'Erro',
@@ -282,10 +289,10 @@ export default function Transacoes() {
       );
       return;
     }
-
+ 
     setMostrarEdicao(false);
     setLancamentoSelecionado(null);
-
+ 
     Alert.alert(
       'Lançamento atualizado!',
       escopoEdicao === 'proximos'
@@ -293,14 +300,14 @@ export default function Transacoes() {
         : 'Somente este lançamento foi atualizado.'
     );
   }
-
+ 
   function excluirEsteEFuturos() {
     if (!lancamentoSelecionado) return;
-
+ 
     const item = lancamentoSelecionado;
-
+ 
     setMostrarOpcoes(false);
-
+ 
     Alert.alert(
       'Excluir lançamentos',
       item.recorrenciaId
@@ -316,10 +323,10 @@ export default function Transacoes() {
           style: 'destructive',
           onPress: () => {
             const sucesso = excluirLancamentosFuturos(item.id);
-
+ 
             if (sucesso) {
               setLancamentoSelecionado(null);
-
+ 
               Alert.alert(
                 'Lançamentos excluídos',
                 'Os lançamentos selecionados foram removidos. O histórico confirmado foi preservado.'
@@ -330,14 +337,14 @@ export default function Transacoes() {
       ]
     );
   }
-
+ 
   function cancelarProgramacao() {
     if (!lancamentoSelecionado?.recorrenciaId) return;
-
+ 
     const item = lancamentoSelecionado;
-
+ 
     setMostrarOpcoes(false);
-
+ 
     Alert.alert(
       'Cancelar programação inteira',
       `Deseja cancelar toda a programação de "${item.descricao}"? Todos os lançamentos ainda pendentes serão removidos. Os já confirmados continuarão no histórico.`,
@@ -352,7 +359,7 @@ export default function Transacoes() {
           onPress: () => {
             cancelarRecorrencia(item.recorrenciaId);
             setLancamentoSelecionado(null);
-
+ 
             Alert.alert(
               'Programação cancelada',
               'Os lançamentos pendentes foram removidos. As movimentações confirmadas foram preservadas.'
@@ -362,7 +369,7 @@ export default function Transacoes() {
       ]
     );
   }
-
+ 
   // ARQUIVAR UMA TRANSAÇÃO REALIZADA
   function confirmarArquivamento(item) {
     Alert.alert(
@@ -377,7 +384,7 @@ export default function Transacoes() {
           text: 'Arquivar',
           onPress: () => {
             const sucesso = arquivarTransacao(item.id);
-
+ 
             if (sucesso) {
               Alert.alert(
                 'Movimentação arquivada',
@@ -389,7 +396,7 @@ export default function Transacoes() {
       ]
     );
   }
-
+ 
   // RESTAURAR UMA TRANSAÇÃO
   function confirmarRestauracao(item) {
     Alert.alert(
@@ -404,7 +411,7 @@ export default function Transacoes() {
           text: 'Restaurar',
           onPress: () => {
             const sucesso = restaurarTransacao(item.id);
-
+ 
             if (sucesso) {
               Alert.alert(
                 'Movimentação restaurada',
@@ -416,10 +423,10 @@ export default function Transacoes() {
       ]
     );
   }
-
+ 
   function renderizarTransacao(item, arquivada = false) {
     const receita = item.tipo === 'Receita';
-
+ 
     return (
       <View key={item.id} style={estilos.transacao}>
         <View
@@ -434,23 +441,23 @@ export default function Transacoes() {
             color={item.corIcone || '#777777'}
           />
         </View>
-
+ 
         <View style={estilos.detalhesTransacao}>
           <Text style={estilos.descricaoTransacao}>
             {item.descricao}
           </Text>
-
+ 
           <Text style={estilos.categoriaTransacao}>
             {item.categoria}
           </Text>
-
+ 
           {item.totalParcelas && (
             <Text style={estilos.textoParcela}>
               Parcela {item.parcela}/{item.totalParcelas}
             </Text>
           )}
         </View>
-
+ 
         <View style={estilos.areaValor}>
           <Text
             style={[
@@ -463,12 +470,12 @@ export default function Transacoes() {
             {receita ? '+' : '-'}
             {formatarMoeda(item.valor)}
           </Text>
-
+ 
           <Text style={estilos.tipoTransacao}>
             {item.tipo}
           </Text>
         </View>
-
+ 
         <TouchableOpacity
           style={estilos.botaoAcaoHistorico}
           onPress={() =>
@@ -486,12 +493,12 @@ export default function Transacoes() {
       </View>
     );
   }
-
+ 
   function renderizarPendente(item) {
     const receita = item.tipo === 'Receita';
     const situacao = obterSituacao(item);
     const disponivel = item.data <= hoje;
-
+ 
     return (
       <View key={item.id} style={estilos.cartaoPendente}>
         <View style={estilos.linhaPendente}>
@@ -507,23 +514,23 @@ export default function Transacoes() {
               color={item.corIcone || '#777777'}
             />
           </View>
-
+ 
           <View style={estilos.detalhesTransacao}>
             <Text style={estilos.descricaoTransacao}>
               {item.descricao}
             </Text>
-
+ 
             <Text style={estilos.categoriaTransacao}>
               {item.categoria}
             </Text>
-
+ 
             {item.totalParcelas && (
               <Text style={estilos.textoParcela}>
                 Parcela {item.parcela}/{item.totalParcelas}
               </Text>
             )}
           </View>
-
+ 
           <View style={estilos.areaValor}>
             <Text
               style={[
@@ -536,12 +543,12 @@ export default function Transacoes() {
               {receita ? '+' : '-'}
               {formatarMoeda(item.valor)}
             </Text>
-
+ 
             <Text style={estilos.tipoTransacao}>
               {formatarData(item.data)}
             </Text>
           </View>
-
+ 
           <TouchableOpacity
             style={estilos.botaoOpcoes}
             onPress={() => abrirOpcoes(item)}
@@ -553,7 +560,7 @@ export default function Transacoes() {
             />
           </TouchableOpacity>
         </View>
-
+ 
         <View style={estilos.linhaSituacao}>
           <View style={estilos.statusPendente}>
             <Ionicons
@@ -561,7 +568,7 @@ export default function Transacoes() {
               size={14}
               color={situacao === 'Atrasado' ? '#D92344' : '#C47A16'}
             />
-
+ 
             <Text
               style={[
                 estilos.textoStatus,
@@ -571,7 +578,7 @@ export default function Transacoes() {
               {situacao}
             </Text>
           </View>
-
+ 
           <TouchableOpacity
             style={[
               estilos.botaoConfirmar,
@@ -585,7 +592,7 @@ export default function Transacoes() {
               size={17}
               color={disponivel ? '#FFFFFF' : '#999999'}
             />
-
+ 
             <Text
               style={[
                 estilos.textoBotaoConfirmar,
@@ -599,23 +606,90 @@ export default function Transacoes() {
       </View>
     );
   }
-
+ 
   function limparFiltros() {
     setBusca('');
     setFiltroAtivo('Todas');
   }
-
+ 
+  function separarPaginasPorData(lista) {
+    const grupos = [];
+    lista.forEach((item) => {
+      const ultimoGrupo = grupos[grupos.length - 1];
+      if (!ultimoGrupo || ultimoGrupo.data !== item.data) {
+        grupos.push({ data: item.data, itens: [item] });
+      } else {
+        ultimoGrupo.itens.push(item);
+      }
+    });
+ 
+    const paginas = [];
+    let pagina = [];
+    let quantidade = 0;
+ 
+    grupos.forEach((grupo) => {
+      if (quantidade >= ITENS_POR_PAGINA && pagina.length > 0) {
+        paginas.push(pagina);
+        pagina = [];
+        quantidade = 0;
+      }
+      pagina.push(...grupo.itens);
+      quantidade += grupo.itens.length;
+    });
+ 
+    if (pagina.length > 0) paginas.push(pagina);
+    return paginas;
+  }
+ 
+  const paginasAtivas = separarPaginasPorData(transacoesFiltradas);
+  const paginasArquivadas = separarPaginasPorData(arquivadasFiltradas);
+  const totalPaginasAtivas = Math.max(1, paginasAtivas.length);
+  const totalPaginasArquivadas = Math.max(1, paginasArquivadas.length);
+  const transacoesDaPagina = paginasAtivas[paginaAtiva - 1] || [];
+  const arquivadasDaPagina = paginasArquivadas[paginaArquivadas - 1] || [];
+ 
+  useEffect(() => {
+    if (paginaAtiva > totalPaginasAtivas) setPaginaAtiva(totalPaginasAtivas);
+    if (paginaArquivadas > totalPaginasArquivadas) setPaginaArquivadas(totalPaginasArquivadas);
+  }, [paginaAtiva, paginaArquivadas, totalPaginasAtivas, totalPaginasArquivadas]);
+ 
+  function renderizarPaginacao(pagina, total, alterarPagina) {
+    if (total <= 1) return null;
+ 
+    return (
+      <View style={estilos.paginacao}>
+        <TouchableOpacity
+          style={[estilos.botaoPagina, pagina === 1 && estilos.botaoPaginaDesativado]}
+          disabled={pagina === 1}
+          onPress={() => alterarPagina(pagina - 1)}
+        >
+          <Ionicons name="chevron-back" size={17} color={pagina === 1 ? '#BBBBBB' : '#D92344'} />
+          <Text style={[estilos.textoPagina, pagina === 1 && estilos.textoPaginaDesativado]}>Anterior</Text>
+        </TouchableOpacity>
+        <Text style={estilos.contadorPagina}>Página {pagina} de {total}</Text>
+        <TouchableOpacity
+          style={[estilos.botaoPagina, pagina === total && estilos.botaoPaginaDesativado]}
+          disabled={pagina === total}
+          onPress={() => alterarPagina(pagina + 1)}
+        >
+          <Text style={[estilos.textoPagina, pagina === total && estilos.textoPaginaDesativado]}>Próxima</Text>
+          <Ionicons name="chevron-forward" size={17} color={pagina === total ? '#BBBBBB' : '#D92344'} />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+ 
   function renderizarGrupos(lista, arquivada = false) {
     const grupos = {};
-
+ 
     lista.forEach((item) => {
       if (!grupos[item.data]) {
         grupos[item.data] = [];
       }
-
+ 
       grupos[item.data].push(item);
     });
-
+ 
     return Object.entries(grupos)
       .sort(([dataA], [dataB]) => dataB.localeCompare(dataA))
       .map(([data, itens]) => (
@@ -623,7 +697,7 @@ export default function Transacoes() {
           <Text style={estilos.tituloData}>
             {formatarData(data)}
           </Text>
-
+ 
           <View style={estilos.cartaoTransacoes}>
             {itens.map((item) =>
               renderizarTransacao(item, arquivada)
@@ -632,7 +706,7 @@ export default function Transacoes() {
         </View>
       ));
   }
-
+ 
   if (!carregado) {
     return (
       <View style={estilos.carregando}>
@@ -642,7 +716,7 @@ export default function Transacoes() {
       </View>
     );
   }
-
+ 
   return (
     <View style={estilos.container}>
       <ScrollView
@@ -655,12 +729,12 @@ export default function Transacoes() {
             <Text style={estilos.subtitulo}>
               Acompanhe suas movimentações
             </Text>
-
+ 
             <Text style={estilos.titulo}>
               Transações
             </Text>
           </View>
-
+ 
           <TouchableOpacity
             style={estilos.botaoAdicionar}
             onPress={abrirNovaTransacao}
@@ -672,16 +746,16 @@ export default function Transacoes() {
             />
           </TouchableOpacity>
         </View>
-
+ 
         <View style={estilos.cartaoSaldo}>
           <Text style={estilos.rotuloSaldo}>
             Saldo das movimentações confirmadas
           </Text>
-
+ 
           <Text style={estilos.valorSaldo}>
             {formatarMoeda(saldoPeriodo)}
           </Text>
-
+ 
           <View style={estilos.linhaResumo}>
             <View style={estilos.itemResumo}>
               <View style={estilos.iconeResumo}>
@@ -691,18 +765,18 @@ export default function Transacoes() {
                   color="#FFFFFF"
                 />
               </View>
-
+ 
               <View>
                 <Text style={estilos.rotuloResumo}>
                   Receitas
                 </Text>
-
+ 
                 <Text style={estilos.valorResumo}>
                   {formatarMoeda(totalReceitas)}
                 </Text>
               </View>
             </View>
-
+ 
             <View style={estilos.itemResumo}>
               <View style={estilos.iconeResumo}>
                 <Ionicons
@@ -711,12 +785,12 @@ export default function Transacoes() {
                   color="#FFFFFF"
                 />
               </View>
-
+ 
               <View>
                 <Text style={estilos.rotuloResumo}>
                   Despesas
                 </Text>
-
+ 
                 <Text style={estilos.valorResumo}>
                   {formatarMoeda(totalDespesas)}
                 </Text>
@@ -724,45 +798,45 @@ export default function Transacoes() {
             </View>
           </View>
         </View>
-
+ 
         <View style={estilos.avisoLimite}>
           <Ionicons
             name="archive-outline"
             size={19}
             color="#D92344"
           />
-
+ 
           <Text style={estilos.textoAvisoLimite}>
             A lista principal mantém até 100 movimentações.
             As mais antigas são arquivadas sem serem apagadas.
           </Text>
         </View>
-
+ 
         <View style={estilos.cabecalhoLista}>
           <Text style={estilos.tituloSecao}>
             Movimentações
           </Text>
-
+ 
           <View style={estilos.seletorPeriodo}>
             <Ionicons
               name="calendar-outline"
               size={16}
               color="#D92344"
             />
-
+ 
             <Text style={estilos.textoPeriodo}>
               Todas as datas
             </Text>
           </View>
         </View>
-
+ 
         <View style={estilos.campoBusca}>
           <Ionicons
             name="search-outline"
             size={21}
             color="#888888"
           />
-
+ 
           <TextInput
             style={estilos.inputBusca}
             placeholder="Buscar transação ou categoria"
@@ -772,7 +846,7 @@ export default function Transacoes() {
             autoCapitalize="none"
             autoCorrect={false}
           />
-
+ 
           {busca.length > 0 && (
             <TouchableOpacity onPress={() => setBusca('')}>
               <Ionicons
@@ -783,7 +857,7 @@ export default function Transacoes() {
             </TouchableOpacity>
           )}
         </View>
-
+ 
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -791,7 +865,7 @@ export default function Transacoes() {
         >
           {['Todas', 'Receita', 'Despesa'].map((filtro) => {
             const ativo = filtroAtivo === filtro;
-
+ 
             return (
               <TouchableOpacity
                 key={filtro}
@@ -817,25 +891,25 @@ export default function Transacoes() {
             );
           })}
         </ScrollView>
-
+ 
         <View style={estilos.cabecalhoProgramados}>
           <View>
             <Text style={estilos.tituloSecao}>
               Lançamentos programados
             </Text>
-
+ 
             <Text style={estilos.subtituloProgramados}>
               Confirme quando realizar o pagamento ou recebimento.
             </Text>
           </View>
-
+ 
           <View style={estilos.contadorPendentes}>
             <Text style={estilos.numeroPendentes}>
               {pendentesFiltrados.length}
             </Text>
           </View>
         </View>
-
+ 
         {pendentesFiltrados.length > 0 ? (
           <View style={estilos.listaPendentes}>
             {pendentesFiltrados.map(renderizarPendente)}
@@ -847,25 +921,25 @@ export default function Transacoes() {
               size={27}
               color="#AAAAAA"
             />
-
+ 
             <Text style={estilos.textoVazioProgramados}>
               Nenhum lançamento programado encontrado.
             </Text>
           </View>
         )}
-
+ 
         <View style={estilos.cabecalhoRealizadas}>
           <Text style={estilos.tituloSecao}>
             Movimentações realizadas
           </Text>
-
+ 
           <Text style={estilos.quantidadeRealizadas}>
             {transacoesFiltradas.length} de 100
           </Text>
         </View>
-
+ 
         {transacoesFiltradas.length > 0 ? (
-          renderizarGrupos(transacoesFiltradas)
+          renderizarGrupos(transacoesDaPagina)
         ) : (
           <View style={estilos.estadoVazio}>
             <Ionicons
@@ -873,15 +947,15 @@ export default function Transacoes() {
               size={32}
               color="#D92344"
             />
-
+ 
             <Text style={estilos.tituloVazio}>
               Nenhuma transação encontrada
             </Text>
-
+ 
             <Text style={estilos.textoVazio}>
               Tente mudar os filtros ou pesquisar outro nome.
             </Text>
-
+ 
             <TouchableOpacity
               style={estilos.botaoLimpar}
               onPress={limparFiltros}
@@ -892,7 +966,8 @@ export default function Transacoes() {
             </TouchableOpacity>
           </View>
         )}
-
+        {renderizarPaginacao(paginaAtiva, totalPaginasAtivas, setPaginaAtiva)}
+ 
         {/* ÁREA DE ARQUIVADAS */}
         <TouchableOpacity
           style={estilos.botaoMostrarArquivadas}
@@ -904,17 +979,17 @@ export default function Transacoes() {
               size={20}
               color="#D92344"
             />
-
+ 
             <View style={{ flex: 1 }}>
               <Text style={estilos.tituloArquivadas}>
                 Movimentações arquivadas
               </Text>
-
+ 
               <Text style={estilos.subtituloArquivadas}>
                 {transacoesArquivadas.length} registros preservados
               </Text>
             </View>
-
+ 
             <Ionicons
               name={
                 mostrarArquivadas
@@ -926,7 +1001,7 @@ export default function Transacoes() {
             />
           </View>
         </TouchableOpacity>
-
+ 
         {mostrarArquivadas && (
           <View style={estilos.areaArquivadas}>
             <Text style={estilos.textoOrientacaoArquivadas}>
@@ -934,9 +1009,9 @@ export default function Transacoes() {
               cálculos financeiros. Use o botão de restauração
               para colocá-los novamente na lista principal.
             </Text>
-
+ 
             {arquivadasFiltradas.length > 0 ? (
-              renderizarGrupos(arquivadasFiltradas, true)
+              renderizarGrupos(arquivadasDaPagina, true)
             ) : (
               <View style={estilos.vazioProgramados}>
                 <Text style={estilos.textoVazioProgramados}>
@@ -944,14 +1019,15 @@ export default function Transacoes() {
                 </Text>
               </View>
             )}
+            {renderizarPaginacao(paginaArquivadas, totalPaginasArquivadas, setPaginaArquivadas)}
           </View>
         )}
-
+ 
         <Text style={estilos.rodape}>
           {transacoes.length} movimentações preservadas no histórico
         </Text>
       </ScrollView>
-
+ 
       {/* MENU DE OPÇÕES DO LANÇAMENTO PENDENTE */}
       <Modal
         visible={mostrarOpcoes}
@@ -966,12 +1042,12 @@ export default function Transacoes() {
                 <Text style={estilos.tituloModal}>
                   Gerenciar lançamento
                 </Text>
-
+ 
                 <Text style={estilos.subtituloModal}>
                   {lancamentoSelecionado?.descricao}
                 </Text>
               </View>
-
+ 
               <TouchableOpacity
                 onPress={() => setMostrarOpcoes(false)}
               >
@@ -982,7 +1058,7 @@ export default function Transacoes() {
                 />
               </TouchableOpacity>
             </View>
-
+ 
             <TouchableOpacity
               style={estilos.opcaoModal}
               onPress={() => abrirEdicao('unico')}
@@ -992,18 +1068,18 @@ export default function Transacoes() {
                 size={21}
                 color="#D92344"
               />
-
+ 
               <View style={estilos.textoOpcaoModal}>
                 <Text style={estilos.tituloOpcaoModal}>
                   Editar somente este
                 </Text>
-
+ 
                 <Text style={estilos.descricaoOpcaoModal}>
                   Altera apenas o lançamento selecionado.
                 </Text>
               </View>
             </TouchableOpacity>
-
+ 
             {lancamentoSelecionado?.recorrenciaId && (
               <>
                 <TouchableOpacity
@@ -1015,18 +1091,18 @@ export default function Transacoes() {
                     size={21}
                     color="#D92344"
                   />
-
+ 
                   <View style={estilos.textoOpcaoModal}>
                     <Text style={estilos.tituloOpcaoModal}>
                       Editar este e os próximos
                     </Text>
-
+ 
                     <Text style={estilos.descricaoOpcaoModal}>
                       Atualiza os lançamentos pendentes a partir deste.
                     </Text>
                   </View>
                 </TouchableOpacity>
-
+ 
                 <TouchableOpacity
                   style={estilos.opcaoModal}
                   onPress={excluirEsteEFuturos}
@@ -1036,18 +1112,18 @@ export default function Transacoes() {
                     size={21}
                     color="#D92344"
                   />
-
+ 
                   <View style={estilos.textoOpcaoModal}>
                     <Text style={estilos.tituloOpcaoModal}>
                       Excluir este e os próximos
                     </Text>
-
+ 
                     <Text style={estilos.descricaoOpcaoModal}>
                       Preserva as parcelas anteriores e confirmadas.
                     </Text>
                   </View>
                 </TouchableOpacity>
-
+ 
                 <TouchableOpacity
                   style={estilos.opcaoModal}
                   onPress={cancelarProgramacao}
@@ -1057,12 +1133,12 @@ export default function Transacoes() {
                     size={21}
                     color="#D92344"
                   />
-
+ 
                   <View style={estilos.textoOpcaoModal}>
                     <Text style={estilos.tituloOpcaoModal}>
                       Cancelar programação inteira
                     </Text>
-
+ 
                     <Text style={estilos.descricaoOpcaoModal}>
                       Remove todos os lançamentos ainda pendentes.
                     </Text>
@@ -1070,7 +1146,7 @@ export default function Transacoes() {
                 </TouchableOpacity>
               </>
             )}
-
+ 
             {!lancamentoSelecionado?.recorrenciaId && (
               <TouchableOpacity
                 style={estilos.opcaoModal}
@@ -1081,12 +1157,12 @@ export default function Transacoes() {
                   size={21}
                   color="#D92344"
                 />
-
+ 
                 <View style={estilos.textoOpcaoModal}>
                   <Text style={estilos.tituloOpcaoModal}>
                     Excluir lançamento
                   </Text>
-
+ 
                   <Text style={estilos.descricaoOpcaoModal}>
                     Remove este lançamento pendente.
                   </Text>
@@ -1096,7 +1172,7 @@ export default function Transacoes() {
           </View>
         </View>
       </Modal>
-
+ 
       {/* MODAL DE EDIÇÃO */}
       <Modal
         visible={mostrarEdicao}
@@ -1114,14 +1190,14 @@ export default function Transacoes() {
                 <Text style={estilos.tituloModal}>
                   Editar lançamento
                 </Text>
-
+ 
                 <Text style={estilos.subtituloModal}>
                   {escopoEdicao === 'proximos'
                     ? 'Este e os próximos pendentes'
                     : 'Somente este lançamento'}
                 </Text>
               </View>
-
+ 
               <TouchableOpacity
                 onPress={() => setMostrarEdicao(false)}
               >
@@ -1132,11 +1208,11 @@ export default function Transacoes() {
                 />
               </TouchableOpacity>
             </View>
-
+ 
             <Text style={estilos.rotuloCampoModal}>
               Descrição
             </Text>
-
+ 
             <TextInput
               style={estilos.inputModal}
               value={descricaoEdicao}
@@ -1145,11 +1221,11 @@ export default function Transacoes() {
               placeholderTextColor="#999999"
               maxLength={100}
             />
-
+ 
             <Text style={estilos.rotuloCampoModal}>
               Categoria
             </Text>
-
+ 
             <TextInput
               style={estilos.inputModal}
               value={categoriaEdicao}
@@ -1157,14 +1233,14 @@ export default function Transacoes() {
               placeholder="Categoria"
               placeholderTextColor="#999999"
             />
-
+ 
             <Text style={estilos.rotuloCampoModal}>
               Valor por lançamento
             </Text>
-
+ 
             <View style={estilos.inputValorModal}>
               <Text style={estilos.simboloModal}>R$</Text>
-
+ 
               <TextInput
                 style={estilos.campoValorModal}
                 value={valorEdicao}
@@ -1174,7 +1250,7 @@ export default function Transacoes() {
                 keyboardType="decimal-pad"
               />
             </View>
-
+ 
             <TouchableOpacity
               style={estilos.botaoSalvarEdicao}
               onPress={salvarEdicao}
@@ -1184,12 +1260,12 @@ export default function Transacoes() {
                 size={20}
                 color="#FFFFFF"
               />
-
+ 
               <Text style={estilos.textoSalvarEdicao}>
                 Salvar alterações
               </Text>
             </TouchableOpacity>
-
+ 
             <TouchableOpacity
               style={estilos.botaoCancelarEdicao}
               onPress={() => setMostrarEdicao(false)}
@@ -1204,7 +1280,7 @@ export default function Transacoes() {
     </View>
   );
 }
-
+ 
 const estilos = StyleSheet.create({
   container: {
     flex: 1,
@@ -1641,6 +1717,40 @@ const estilos = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     marginBottom: 10,
+  },
+  paginacao: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    marginBottom: 18,
+    paddingVertical: 8,
+  },
+  botaoPagina: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#F1D5DA',
+  },
+  botaoPaginaDesativado: {
+    borderColor: '#EEEEEE',
+  },
+  textoPagina: {
+    color: '#D92344',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  textoPaginaDesativado: {
+    color: '#BBBBBB',
+  },
+  contadorPagina: {
+    color: '#777777',
+    fontSize: 11,
+    fontWeight: '700',
   },
   fundoModal: {
     flex: 1,
