@@ -1,4 +1,3 @@
-
 import React, {
   createContext,
   useContext,
@@ -7,6 +6,11 @@ import React, {
 } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import {
+  limparTelefone,
+  validarTelefone,
+} from '../../src/utils/telefone';
 
 const AuthContext = createContext(null);
 
@@ -44,6 +48,7 @@ export function AuthProvider({ children }) {
             await AsyncStorage.removeItem(CHAVE_SESSAO);
           }
         }
+
       } catch (erro) {
         console.log('Erro ao carregar autenticação:', erro);
       } finally {
@@ -58,14 +63,31 @@ export function AuthProvider({ children }) {
   async function cadastrarUsuario(dados) {
     const nome = dados.nome.trim();
     const email = dados.email.trim().toLowerCase();
-    const telefone = dados.telefone
-      ? dados.telefone.trim()
-      : '';
+    const telefone = limparTelefone(dados.telefone);
 
     const senha = dados.senha;
 
     if (!nome || !email || !senha) {
       throw new Error('Preencha todos os campos obrigatórios.');
+    }
+
+    // Valida o telefone antes de salvar.
+    if (!validarTelefone(telefone)) {
+      throw new Error(
+        'Digite um telefone brasileiro válido, incluindo o DDD.'
+      );
+    }
+
+    const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formatoEmail.test(email)) {
+      throw new Error('Digite um endereço de e-mail válido.');
+    }
+
+    if (senha.length < 8) {
+      throw new Error(
+        'A senha precisa ter pelo menos 8 caracteres.'
+      );
     }
 
     const usuariosAtuais = await obterUsuariosAtualizados();
@@ -75,7 +97,9 @@ export function AuthProvider({ children }) {
     );
 
     if (emailExistente) {
-      throw new Error('Já existe uma conta cadastrada com esse e-mail.');
+      throw new Error(
+        'Já existe uma conta cadastrada com esse e-mail.'
+      );
     }
 
     const novoUsuario = {
@@ -156,7 +180,7 @@ export function AuthProvider({ children }) {
       : usuarioLogado.email;
 
     const telefone = dadosAtualizados.telefone !== undefined
-      ? dadosAtualizados.telefone.trim()
+      ? limparTelefone(dadosAtualizados.telefone)
       : usuarioLogado.telefone || '';
 
     if (!nome || !email) {
@@ -169,6 +193,13 @@ export function AuthProvider({ children }) {
       throw new Error('Digite um endereço de e-mail válido.');
     }
 
+    // Valida o telefone antes de atualizar.
+    if (!validarTelefone(telefone)) {
+      throw new Error(
+        'Digite um telefone brasileiro válido, incluindo o DDD.'
+      );
+    }
+
     const emailEmUso = usuariosAtuais.some(
       usuario =>
         usuario.id !== usuarioLogado.id &&
@@ -176,7 +207,9 @@ export function AuthProvider({ children }) {
     );
 
     if (emailEmUso) {
-      throw new Error('Esse e-mail já está sendo utilizado por outra conta.');
+      throw new Error(
+        'Esse e-mail já está sendo utilizado por outra conta.'
+      );
     }
 
     const usuarioAtualizado = {
@@ -214,11 +247,15 @@ export function AuthProvider({ children }) {
     );
 
     if (!usuarioEncontrado) {
-      throw new Error('Não encontramos uma conta com esse e-mail.');
+      throw new Error(
+        'Não encontramos uma conta com esse e-mail.'
+      );
     }
 
     if (!novaSenha || novaSenha.length < 8) {
-      throw new Error('A senha precisa ter pelo menos 8 caracteres.');
+      throw new Error(
+        'A senha precisa ter pelo menos 8 caracteres.'
+      );
     }
 
     const novaLista = usuariosAtuais.map(usuario =>

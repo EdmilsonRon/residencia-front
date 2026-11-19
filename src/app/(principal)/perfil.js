@@ -21,6 +21,12 @@ import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../../contexts/AuthContext';
 import estilos from '../../styles/perfilStyles';
 
+import {
+  formatarTelefone,
+  limparTelefone,
+  validarTelefone,
+} from '../../utils/telefone';
+
 export default function Perfil() {
   const {
     usuarioLogado,
@@ -42,15 +48,31 @@ export default function Perfil() {
     if (usuarioLogado) {
       setNome(usuarioLogado.nome || '');
       setEmail(usuarioLogado.email || '');
-      setTelefone(usuarioLogado.telefone || '');
+      setTelefone(formatarTelefone(usuarioLogado.telefone || ''));
     }
   }, [usuarioLogado]);
 
+  // Abre a edição com os dados atuais.
   function abrirEdicao() {
     setNome(usuarioLogado?.nome || '');
     setEmail(usuarioLogado?.email || '');
-    setTelefone(usuarioLogado?.telefone || '');
+
+    setTelefone(
+      formatarTelefone(usuarioLogado?.telefone || '')
+    );
+
     setModalEditar(true);
+  }
+
+  // Formata o telefone e impede a digitação de mais de 11 números.
+  function alterarTelefone(valor) {
+    const numeros = String(valor || '').replace(/\D/g, '');
+
+    if (numeros.length > 11) {
+      return;
+    }
+
+    setTelefone(formatarTelefone(numeros));
   }
 
   async function salvarEdicao() {
@@ -67,7 +89,19 @@ export default function Perfil() {
     const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formatoEmail.test(email.trim())) {
-      Alert.alert('E-mail inválido', 'Digite um e-mail válido.');
+      Alert.alert(
+        'E-mail inválido',
+        'Digite um e-mail válido.'
+      );
+      return;
+    }
+
+    // Permite deixar o telefone vazio, mas valida se for preenchido.
+    if (telefone.trim() && !validarTelefone(telefone)) {
+      Alert.alert(
+        'Telefone inválido',
+        'Digite um telefone brasileiro válido, incluindo o DDD. Exemplo: (81) 99785-4357.'
+      );
       return;
     }
 
@@ -75,9 +109,11 @@ export default function Perfil() {
       setSalvando(true);
 
       await atualizarUsuario({
-        nome,
-        email,
-        telefone,
+        nome: nome.trim(),
+        email: email.trim().toLowerCase(),
+
+        // Salva somente os números, sem parênteses, espaço ou hífen.
+        telefone: limparTelefone(telefone),
       });
 
       setModalEditar(false);
@@ -162,6 +198,7 @@ export default function Perfil() {
     return (
       <View style={estilos.carregando}>
         <ActivityIndicator size="large" color="#D92344" />
+
         <Text style={estilos.textoCarregando}>
           Carregando perfil...
         </Text>
@@ -331,7 +368,7 @@ export default function Perfil() {
               </Text>
 
               <Text style={estilos.valor}>
-                {usuarioLogado.telefone || 'Não informado'}
+                {formatarTelefone(usuarioLogado.telefone || '') || 'Não informado'}
               </Text>
             </View>
           </View>
@@ -579,11 +616,12 @@ export default function Perfil() {
 
                 <TextInput
                   style={estilos.inputModal}
-                  placeholder="Seu telefone"
+                  placeholder="(00) 00000-0000"
                   value={telefone}
-                  onChangeText={setTelefone}
+                  onChangeText={alterarTelefone}
                   keyboardType="phone-pad"
                   maxLength={15}
+                  autoComplete="tel"
                 />
               </View>
 
