@@ -104,6 +104,14 @@ export default function Perfil() {
     router.push('/(principal)/configuracoes');
   }
 
+  function abrirPrivacidade() {
+    router.push('/(principal)/privacidade-seguranca');
+  }
+
+  function abrirPoliticaPrivacidade() {
+    router.push('/(principal)/politica-privacidade');
+  }
+
   function formatarData(data) {
     if (!data) return 'Não disponível';
 
@@ -429,12 +437,7 @@ export default function Perfil() {
 
           <TouchableOpacity
             style={estilos.opcao}
-            onPress={() =>
-              Alert.alert(
-                'Privacidade e segurança',
-                'As configurações avançadas de privacidade serão implementadas futuramente.'
-              )
-            }
+            onPress={abrirPrivacidade}
           >
             <View style={estilos.iconeOpcao}>
               <Ionicons
@@ -451,6 +454,37 @@ export default function Perfil() {
 
               <Text style={estilos.descricaoOpcao}>
                 Proteção das suas informações
+              </Text>
+            </View>
+
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color="#999999"
+            />
+          </TouchableOpacity>
+
+          <View style={estilos.divisor} />
+
+          <TouchableOpacity
+            style={estilos.opcao}
+            onPress={abrirPoliticaPrivacidade}
+          >
+            <View style={estilos.iconeOpcao}>
+              <Ionicons
+                name="document-text-outline"
+                size={22}
+                color="#D92344"
+              />
+            </View>
+
+            <View style={estilos.textosOpcao}>
+              <Text style={estilos.textoOpcao}>
+                Política de privacidade
+              </Text>
+
+              <Text style={estilos.descricaoOpcao}>
+                Como seus dados são tratados
               </Text>
             </View>
 
