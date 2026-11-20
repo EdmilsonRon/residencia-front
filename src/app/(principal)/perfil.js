@@ -1,17 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  TextInput,
-  Modal,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -21,123 +17,21 @@ import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../../contexts/AuthContext';
 import estilos from '../../styles/perfilStyles';
 
-import {
-  formatarTelefone,
-  limparTelefone,
-  validarTelefone,
-} from '../../utils/telefone';
+import { formatarTelefone } from '../../utils/telefone';
 
 export default function Perfil() {
   const {
     usuarioLogado,
-    atualizarUsuario,
     sairDaConta,
     carregando,
   } = useAuth();
 
-  const [modalEditar, setModalEditar] = useState(false);
-
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [telefone, setTelefone] = useState('');
-
-  const [salvando, setSalvando] = useState(false);
-
-  // Preenche os campos com os dados do usuário.
-  useEffect(() => {
-    if (usuarioLogado) {
-      setNome(usuarioLogado.nome || '');
-      setEmail(usuarioLogado.email || '');
-      setTelefone(formatarTelefone(usuarioLogado.telefone || ''));
-    }
-  }, [usuarioLogado]);
-
-  // Abre a edição com os dados atuais.
-  function abrirEdicao() {
-    setNome(usuarioLogado?.nome || '');
-    setEmail(usuarioLogado?.email || '');
-
-    setTelefone(
-      formatarTelefone(usuarioLogado?.telefone || '')
-    );
-
-    setModalEditar(true);
-  }
-
-  // Formata o telefone e impede a digitação de mais de 11 números.
-  function alterarTelefone(valor) {
-    const numeros = String(valor || '').replace(/\D/g, '');
-
-    if (numeros.length > 11) {
-      return;
-    }
-
-    setTelefone(formatarTelefone(numeros));
-  }
-
-  async function salvarEdicao() {
-    if (salvando) return;
-
-    if (!nome.trim() || !email.trim()) {
-      Alert.alert(
-        'Campos obrigatórios',
-        'Nome e e-mail precisam ser preenchidos.'
-      );
-      return;
-    }
-
-    const formatoEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!formatoEmail.test(email.trim())) {
-      Alert.alert(
-        'E-mail inválido',
-        'Digite um e-mail válido.'
-      );
-      return;
-    }
-
-    // Permite deixar o telefone vazio, mas valida se for preenchido.
-    if (telefone.trim() && !validarTelefone(telefone)) {
-      Alert.alert(
-        'Telefone inválido',
-        'Digite um telefone brasileiro válido, incluindo o DDD. Exemplo: (81) 99785-4357.'
-      );
-      return;
-    }
-
-    try {
-      setSalvando(true);
-
-      await atualizarUsuario({
-        nome: nome.trim(),
-        email: email.trim().toLowerCase(),
-
-        // Salva somente os números, sem parênteses, espaço ou hífen.
-        telefone: limparTelefone(telefone),
-      });
-
-      setModalEditar(false);
-
-      Alert.alert(
-        'Perfil atualizado!',
-        'Suas informações foram salvas com sucesso.'
-      );
-    } catch (erro) {
-      Alert.alert(
-        'Não foi possível atualizar',
-        erro.message || 'Ocorreu um erro ao salvar seus dados.'
-      );
-    } finally {
-      setSalvando(false);
-    }
-  }
-
-  function abrirRecuperacaoSenha() {
-    router.push('/recuperar-senha');
-  }
-
   function abrirConfiguracoes() {
     router.push('/(principal)/configuracoes');
+  }
+
+  function abrirPrivacidade() {
+    router.push('/(principal)/privacidade-seguranca');
   }
 
   function formatarData(data) {
@@ -197,7 +91,10 @@ export default function Perfil() {
   if (carregando) {
     return (
       <View style={estilos.carregando}>
-        <ActivityIndicator size="large" color="#D92344" />
+        <ActivityIndicator
+          size="large"
+          color="#D92344"
+        />
 
         <Text style={estilos.textoCarregando}>
           Carregando perfil...
@@ -285,22 +182,6 @@ export default function Perfil() {
               Conta cadastrada
             </Text>
           </View>
-
-          <TouchableOpacity
-            style={estilos.botaoEditar}
-            onPress={abrirEdicao}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name="create-outline"
-              size={18}
-              color="#FFFFFF"
-            />
-
-            <Text style={estilos.textoBotaoEditar}>
-              Editar perfil
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* Informações pessoais */}
@@ -309,6 +190,7 @@ export default function Perfil() {
         </Text>
 
         <View style={estilos.cartaoInformacoes}>
+          {/* Nome */}
           <View style={estilos.itemInformacao}>
             <View style={estilos.iconeInformacao}>
               <Ionicons
@@ -331,6 +213,7 @@ export default function Perfil() {
 
           <View style={estilos.divisor} />
 
+          {/* E-mail */}
           <View style={estilos.itemInformacao}>
             <View style={estilos.iconeInformacao}>
               <Ionicons
@@ -353,6 +236,7 @@ export default function Perfil() {
 
           <View style={estilos.divisor} />
 
+          {/* Telefone */}
           <View style={estilos.itemInformacao}>
             <View style={estilos.iconeInformacao}>
               <Ionicons
@@ -375,6 +259,7 @@ export default function Perfil() {
 
           <View style={estilos.divisor} />
 
+          {/* Data de cadastro */}
           <View style={estilos.itemInformacao}>
             <View style={estilos.iconeInformacao}>
               <Ionicons
@@ -402,6 +287,7 @@ export default function Perfil() {
         </Text>
 
         <View style={estilos.cartaoOpcoes}>
+          {/* Configurações */}
           <TouchableOpacity
             style={estilos.opcao}
             onPress={abrirConfiguracoes}
@@ -433,45 +319,10 @@ export default function Perfil() {
 
           <View style={estilos.divisor} />
 
+          {/* Privacidade e segurança */}
           <TouchableOpacity
             style={estilos.opcao}
-            onPress={abrirRecuperacaoSenha}
-          >
-            <View style={estilos.iconeOpcao}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={22}
-                color="#D92344"
-              />
-            </View>
-
-            <View style={estilos.textosOpcao}>
-              <Text style={estilos.textoOpcao}>
-                Alterar senha
-              </Text>
-
-              <Text style={estilos.descricaoOpcao}>
-                Recuperação de acesso à conta
-              </Text>
-            </View>
-
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color="#999999"
-            />
-          </TouchableOpacity>
-
-          <View style={estilos.divisor} />
-
-          <TouchableOpacity
-            style={estilos.opcao}
-            onPress={() =>
-              Alert.alert(
-                'Privacidade e segurança',
-                'As configurações avançadas de privacidade serão implementadas futuramente.'
-              )
-            }
+            onPress={abrirPrivacidade}
           >
             <View style={estilos.iconeOpcao}>
               <Ionicons
@@ -499,7 +350,7 @@ export default function Perfil() {
           </TouchableOpacity>
         </View>
 
-        {/* Sair */}
+        {/* Sair da conta */}
         <TouchableOpacity
           style={estilos.botaoSair}
           onPress={confirmarSaida}
@@ -516,153 +367,11 @@ export default function Perfil() {
           </Text>
         </TouchableOpacity>
 
+        {/* Versão */}
         <Text style={estilos.versao}>
           Meu Financeiro · Versão 1.0.0
         </Text>
       </ScrollView>
-
-      {/* Modal de edição */}
-      <Modal
-        visible={modalEditar}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setModalEditar(false)}
-      >
-        <KeyboardAvoidingView
-          style={estilos.fundoModal}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <View style={estilos.modal}>
-            <View style={estilos.cabecalhoModal}>
-              <View>
-                <Text style={estilos.tituloModal}>
-                  Editar perfil
-                </Text>
-
-                <Text style={estilos.descricaoModal}>
-                  Atualize suas informações pessoais.
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                style={estilos.botaoFechar}
-                onPress={() => setModalEditar(false)}
-              >
-                <Ionicons
-                  name="close"
-                  size={24}
-                  color="#555555"
-                />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              <Text style={estilos.rotuloModal}>
-                Nome completo
-              </Text>
-
-              <View style={estilos.campoModal}>
-                <Ionicons
-                  name="person-outline"
-                  size={20}
-                  color="#888888"
-                />
-
-                <TextInput
-                  style={estilos.inputModal}
-                  placeholder="Seu nome completo"
-                  value={nome}
-                  onChangeText={setNome}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              </View>
-
-              <Text style={estilos.rotuloModal}>
-                E-mail
-              </Text>
-
-              <View style={estilos.campoModal}>
-                <Ionicons
-                  name="mail-outline"
-                  size={20}
-                  color="#888888"
-                />
-
-                <TextInput
-                  style={estilos.inputModal}
-                  placeholder="Seu e-mail"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
-
-              <Text style={estilos.rotuloModal}>
-                Telefone
-              </Text>
-
-              <View style={estilos.campoModal}>
-                <Ionicons
-                  name="call-outline"
-                  size={20}
-                  color="#888888"
-                />
-
-                <TextInput
-                  style={estilos.inputModal}
-                  placeholder="(00) 00000-0000"
-                  value={telefone}
-                  onChangeText={alterarTelefone}
-                  keyboardType="phone-pad"
-                  maxLength={15}
-                  autoComplete="tel"
-                />
-              </View>
-
-              <TouchableOpacity
-                style={[
-                  estilos.botaoSalvar,
-                  salvando && estilos.botaoDesabilitado,
-                ]}
-                onPress={salvarEdicao}
-                disabled={salvando}
-              >
-                {salvando ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <>
-                    <Text style={estilos.textoBotaoSalvar}>
-                      Salvar alterações
-                    </Text>
-
-                    <Ionicons
-                      name="checkmark"
-                      size={20}
-                      color="#FFFFFF"
-                    />
-                  </>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={estilos.botaoCancelar}
-                onPress={() => setModalEditar(false)}
-                disabled={salvando}
-              >
-                <Text style={estilos.textoBotaoCancelar}>
-                  Cancelar
-                </Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
     </>
   );
 }
