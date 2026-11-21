@@ -247,7 +247,6 @@ const estilos = StyleSheet.create({
     marginTop: 22,
   },
 
-  // Modal de edição
 
   fundoModal: {
     flex: 1,

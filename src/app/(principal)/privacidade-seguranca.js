@@ -13,7 +13,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-// Dados que o app utiliza.
 const DADOS_USADOS = [
   {
     icone: 'person-outline',
@@ -40,12 +39,10 @@ const DICAS = [
 ];
 
 export default function PrivacidadeSeguranca() {
-  // Navegar para a página de alteração de senha.
   function abrirAlteracaoSenha() {
     router.push('/recuperar-senha');
   }
 
-  // Aviso para funcionalidades ainda não implementadas.
   function avisoEmBreve(titulo) {
     Alert.alert(
       titulo,

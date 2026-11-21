@@ -14,10 +14,7 @@ import { router } from 'expo-router';
 const TITULO = 'Política de Privacidade e Segurança';
 const ATUALIZACAO = 'Última atualização: 17 de novembro de 2026';
 
-// Cada seção tem um título e uma lista de blocos:
-// 'p' = parágrafo, 'destaque' = parágrafo em negrito, 'lista' = itens com marcador.
-// Em 'lista', um item pode ser texto simples ou { rotulo, texto } (rótulo em negrito).
-// Para mudar o texto da política, é só editar aqui.
+
 const SECOES = [
   {
     titulo: '1. Introdução',

@@ -1,4 +1,3 @@
-
 import React, {
   createContext,
   useContext,
@@ -16,17 +15,23 @@ export function MetasProvider({ children }) {
   const [metas, setMetas] = useState([]);
   const [carregado, setCarregado] = useState(false);
 
-  // Recupera as metas salvas.
   useEffect(() => {
     async function carregarMetas() {
       try {
-        const dadosSalvos = await AsyncStorage.getItem(CHAVE_METAS);
+        const dadosSalvos = await AsyncStorage.getItem(
+          CHAVE_METAS
+        );
 
         if (dadosSalvos !== null) {
-          setMetas(JSON.parse(dadosSalvos));
+          const dados = JSON.parse(dadosSalvos);
+
+          setMetas(
+            Array.isArray(dados) ? dados : []
+          );
         }
       } catch (error) {
         console.error('Erro ao carregar metas:', error);
+        setMetas([]);
       } finally {
         setCarregado(true);
       }
@@ -35,7 +40,6 @@ export function MetasProvider({ children }) {
     carregarMetas();
   }, []);
 
-  // Salva automaticamente as alterações.
   useEffect(() => {
     async function salvarMetas() {
       try {
@@ -59,7 +63,7 @@ export function MetasProvider({ children }) {
       id: `${Date.now()}-${Math.random()}`,
     };
 
-    setMetas(atuais => [
+    setMetas((atuais) => [
       ...atuais,
       metaCriada,
     ]);
@@ -68,8 +72,8 @@ export function MetasProvider({ children }) {
   }
 
   function editarMeta(id, dadosAtualizados) {
-    setMetas(atuais =>
-      atuais.map(meta =>
+    setMetas((atuais) =>
+      atuais.map((meta) =>
         meta.id === id
           ? { ...meta, ...dadosAtualizados }
           : meta
@@ -78,8 +82,8 @@ export function MetasProvider({ children }) {
   }
 
   function excluirMeta(id) {
-    setMetas(atuais =>
-      atuais.filter(meta => meta.id !== id)
+    setMetas((atuais) =>
+      atuais.filter((meta) => meta.id !== id)
     );
 
     return {
@@ -91,6 +95,7 @@ export function MetasProvider({ children }) {
     <MetasContext.Provider
       value={{
         metas,
+        carregado,
         adicionarMeta,
         editarMeta,
         excluirMeta,

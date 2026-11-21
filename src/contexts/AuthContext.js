@@ -22,7 +22,6 @@ export function AuthProvider({ children }) {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [carregando, setCarregando] = useState(true);
 
-  // Carrega usuários e sessão quando o aplicativo inicia.
   useEffect(() => {
     async function carregarDados() {
       try {
@@ -71,7 +70,6 @@ export function AuthProvider({ children }) {
       throw new Error('Preencha todos os campos obrigatórios.');
     }
 
-    // Valida o telefone antes de salvar.
     if (!validarTelefone(telefone)) {
       throw new Error(
         'Digite um telefone brasileiro válido, incluindo o DDD.'
@@ -123,7 +121,6 @@ export function AuthProvider({ children }) {
     return novoUsuario;
   }
 
-  // Recupera a lista mais recente do armazenamento.
   async function obterUsuariosAtualizados() {
     const dadosSalvos = await AsyncStorage.getItem(CHAVE_USUARIOS);
 
@@ -157,7 +154,6 @@ export function AuthProvider({ children }) {
     return usuarioEncontrado;
   }
 
-  // Encerra a sessão sem excluir o cadastro.
   async function sairDaConta() {
     await AsyncStorage.removeItem(CHAVE_SESSAO);
     setUsuarioLogado(null);
@@ -193,7 +189,7 @@ export function AuthProvider({ children }) {
       throw new Error('Digite um endereço de e-mail válido.');
     }
 
-    // Valida o telefone antes de atualizar.
+    // Valida o telefone
     if (!validarTelefone(telefone)) {
       throw new Error(
         'Digite um telefone brasileiro válido, incluindo o DDD.'
@@ -236,7 +232,7 @@ export function AuthProvider({ children }) {
     return usuarioAtualizado;
   }
 
-  // Altera a senha de uma conta existente.
+  // Altera a senha
   async function alterarSenha(emailInformado, novaSenha) {
     const email = emailInformado.trim().toLowerCase();
 

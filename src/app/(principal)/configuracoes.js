@@ -36,7 +36,7 @@ export default function Configuracoes() {
   const [telefone, setTelefone] = useState('');
   const [salvando, setSalvando] = useState(false);
 
-  // Carrega os dados atuais do usuário.
+  //dados  do usuário.
   useEffect(() => {
     if (usuarioLogado) {
       setNome(usuarioLogado.nome || '');
@@ -47,7 +47,7 @@ export default function Configuracoes() {
     }
   }, [usuarioLogado]);
 
-  // Verifica se houve alguma alteração nos campos.
+  //alteração nos campos.
   const houveAlteracao = Boolean(usuarioLogado) && (
     nome.trim() !== (usuarioLogado.nome || '') ||
     email.trim().toLowerCase() !==
@@ -56,7 +56,7 @@ export default function Configuracoes() {
       limparTelefone(usuarioLogado.telefone || '')
   );
 
-  // Restaura os dados originais.
+  // Restaura os dados originais
   function descartarAlteracoes() {
     setNome(usuarioLogado?.nome || '');
     setEmail(usuarioLogado?.email || '');
@@ -66,11 +66,9 @@ export default function Configuracoes() {
     );
   }
 
-  // Aplica a máscara brasileira ao telefone.
   function alterarTelefone(valor) {
     const numeros = String(valor || '').replace(/\D/g, '');
 
-    // Impede mais de 11 dígitos.
     if (numeros.length > 11) {
       return;
     }
@@ -78,11 +76,10 @@ export default function Configuracoes() {
     setTelefone(formatarTelefone(numeros));
   }
 
-  // Salva as alterações do perfil.
+  // Salva as alterações perfil.
   async function salvarPerfil() {
     if (salvando) return;
 
-    // Verifica os campos obrigatórios.
     if (!nome.trim() || !email.trim()) {
       Alert.alert(
         'Campos obrigatórios',
@@ -104,8 +101,6 @@ export default function Configuracoes() {
       return;
     }
 
-    // O telefone pode ficar vazio.
-    // Caso seja preenchido, precisa ser válido.
     if (telefone.trim() && !validarTelefone(telefone)) {
       Alert.alert(
         'Telefone inválido',
@@ -138,17 +133,14 @@ export default function Configuracoes() {
     }
   }
 
-  // Navegação para privacidade.
   function abrirPrivacidade() {
     router.push('/(principal)/privacidade-seguranca');
   }
 
-  // Navegação para política de privacidade.
   function abrirPolitica() {
     router.push('/(principal)/politica-privacidade');
   }
 
-  // Estado de carregamento.
   if (carregando) {
     return (
       <View style={estilos.estado}>
@@ -164,7 +156,6 @@ export default function Configuracoes() {
     );
   }
 
-  // Estado sem usuário conectado.
   if (!usuarioLogado) {
     return (
       <View style={estilos.estado}>

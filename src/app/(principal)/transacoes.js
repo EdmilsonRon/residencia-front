@@ -370,7 +370,6 @@ export default function Transacoes() {
     );
   }
  
-  // ARQUIVAR UMA TRANSAÇÃO REALIZADA
   function confirmarArquivamento(item) {
     Alert.alert(
       'Arquivar movimentação',
@@ -397,7 +396,6 @@ export default function Transacoes() {
     );
   }
  
-  // RESTAURAR UMA TRANSAÇÃO
   function confirmarRestauracao(item) {
     Alert.alert(
       'Restaurar movimentação',

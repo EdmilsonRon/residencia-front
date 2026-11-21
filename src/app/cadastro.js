@@ -21,7 +21,6 @@ import { StatusBar } from 'expo-status-bar';
 
 import { useAuth } from '../contexts/AuthContext';
 
-// Funções de telefone
 import {
   formatarTelefone,
   limparTelefone,
@@ -79,7 +78,6 @@ export default function Cadastro() {
       return;
     }
 
-    // Validação do telefone
     if (!validarTelefone(telefone)) {
       Alert.alert(
         'Telefone inválido',
@@ -126,7 +124,6 @@ export default function Cadastro() {
 
         email: email.trim().toLowerCase(),
 
-        // Envia somente os números.
         telefone: limparTelefone(telefone),
 
         senha: senha,

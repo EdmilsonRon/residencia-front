@@ -181,7 +181,6 @@ export function TransacoesProvider({ children }) {
   const [recorrencias, setRecorrencias] = useState([]);
   const [carregado, setCarregado] = useState(false);
 
-  // CARREGAR DADOS
   useEffect(() => {
     async function carregarDados() {
       try {
@@ -195,7 +194,6 @@ export function TransacoesProvider({ children }) {
           AsyncStorage.getItem(CHAVE_RECORRENCIAS),
         ]);
 
-        // Começa com uma lista vazia quando não existem dados salvos.
         const transacoesCarregadas = transacoesSalvas
           ? JSON.parse(transacoesSalvas)
           : [];
@@ -285,7 +283,6 @@ export function TransacoesProvider({ children }) {
     carregarDados();
   }, []);
 
-  // SALVAR DADOS
   useEffect(() => {
     if (!carregado) return;
 
@@ -318,7 +315,6 @@ export function TransacoesProvider({ children }) {
     carregado,
   ]);
 
-  // ADICIONAR TRANSAÇÃO ÚNICA
   function adicionarTransacao(novaTransacao) {
     const transacaoCriada = {
       ...novaTransacao,
@@ -338,7 +334,6 @@ export function TransacoesProvider({ children }) {
     return transacaoCriada;
   }
 
-  // ADICIONAR PROGRAMAÇÃO
   function adicionarRecorrencia(dados) {
     const quantidade = Number(dados.quantidade);
     const valor = Number(dados.valor);
@@ -395,7 +390,6 @@ export function TransacoesProvider({ children }) {
     return resultado.recorrenciaAtualizada;
   }
 
-  // ATUALIZAR PROGRAMAÇÕES ATIVAS
   function atualizarProgramacoes() {
     let pendentesAtualizados = [...lancamentosPendentes];
 
@@ -418,7 +412,6 @@ export function TransacoesProvider({ children }) {
     setLancamentosPendentes(pendentesAtualizados);
   }
 
-  // CONFIRMAR LANÇAMENTO PENDENTE
   function confirmarLancamento(id) {
     const lancamento = lancamentosPendentes.find(
       (item) => item.id === id
@@ -451,7 +444,6 @@ export function TransacoesProvider({ children }) {
     return true;
   }
 
-  // EDITAR LANÇAMENTO PENDENTE
   function editarLancamento(id, novosDados, escopo = 'unico') {
     const lancamento = lancamentosPendentes.find(
       (item) => item.id === id
@@ -525,7 +517,6 @@ export function TransacoesProvider({ children }) {
     return false;
   }
 
-  // EXCLUIR PARCELA PENDENTE E AS SEGUINTES
   function excluirLancamentosFuturos(id) {
     const lancamento = lancamentosPendentes.find(
       (item) => item.id === id
@@ -565,7 +556,6 @@ export function TransacoesProvider({ children }) {
     return true;
   }
 
-  // ARQUIVAR UMA TRANSAÇÃO CONFIRMADA MANUALMENTE
   function arquivarTransacao(id) {
     const existe = transacoes.some(
       (item) => item.id === id && !item.arquivada
@@ -584,7 +574,6 @@ export function TransacoesProvider({ children }) {
     return true;
   }
 
-  // RESTAURAR UMA TRANSAÇÃO ARQUIVADA
   function restaurarTransacao(id) {
     const existe = transacoes.some(
       (item) => item.id === id && item.arquivada
@@ -609,7 +598,6 @@ export function TransacoesProvider({ children }) {
     return true;
   }
 
-  // ATUALIZAR CATEGORIAS
   function atualizarCategoriaTransacoes(
     categoriaAntiga,
     categoriaNova,
@@ -664,7 +652,6 @@ export function TransacoesProvider({ children }) {
     );
   }
 
-  // CANCELAR PROGRAMAÇÃO INTEIRA
   function cancelarRecorrencia(id) {
     setRecorrencias((atuais) =>
       atuais.map((item) =>

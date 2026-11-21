@@ -20,7 +20,6 @@ export default function Home() {
 
   const { transacoes: transacoesContexto } = useTransacoes();
 
-  // RECEITAS E DESPESAS GERAIS
 
   const receitas = transacoesContexto
     .filter((transacao) => transacao.tipo === 'Receita')
@@ -38,7 +37,6 @@ export default function Home() {
 
   const saldoTotal = receitas - despesas;
 
-  // FORMATAÇÃO DE VALORES
 
   function formatarMoeda(valor) {
     return Number(valor || 0).toLocaleString('pt-BR', {
@@ -47,7 +45,6 @@ export default function Home() {
     });
   }
 
-  // FORMATAÇÃO DE DATA
 
   function formatarDataTransacao(data) {
     if (!data) {
@@ -63,7 +60,7 @@ export default function Home() {
     return `${dia}/${mes}/${ano}`;
   }
 
-  // GRÁFICO DOS ÚLTIMOS 6 MESES
+  // GRÁFICO
 
   const dataAtual = new Date();
 
@@ -148,7 +145,6 @@ export default function Home() {
     )
   );
 
-  // TRANSAÇÕES RECENTES
 
   const transacoesRecentes = [...transacoesContexto]
     .sort((a, b) => {
@@ -188,7 +184,6 @@ export default function Home() {
           : '#D92344'),
     }));
 
-  // NAVEGAÇÃO
 
   function navegarParaTransacoes() {
     router.navigate('/transacoes');
@@ -202,7 +197,6 @@ export default function Home() {
     router.navigate('/categorias');
   }
 
-  // COMPONENTE DE TRANSAÇÃO
 
   function renderizarTransacao(transacao) {
     const entrada = transacao.valor > 0;
@@ -250,7 +244,6 @@ export default function Home() {
     );
   }
 
-  // TELA
 
   return (
     <View style={estilos.container}>

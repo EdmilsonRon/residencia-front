@@ -107,7 +107,6 @@ export function CategoriasProvider({ children }) {
   const [categorias, setCategorias] = useState(categoriasIniciais);
   const [carregado, setCarregado] = useState(false);
 
-  // Recupera as categorias salvas.
   useEffect(() => {
     async function carregarCategorias() {
       try {
@@ -128,7 +127,6 @@ export function CategoriasProvider({ children }) {
     carregarCategorias();
   }, []);
 
-  // Salva automaticamente as alterações.
   useEffect(() => {
     async function salvarCategorias() {
       try {
@@ -146,7 +144,6 @@ export function CategoriasProvider({ children }) {
     }
   }, [categorias, carregado]);
 
-  // Mantém "Outros" sempre no final da lista.
   function ordenarCategorias(lista) {
     return [...lista].sort((a, b) => {
       const aOutros = a.nome.trim().toLowerCase() === 'outros';
@@ -199,7 +196,6 @@ export function CategoriasProvider({ children }) {
     };
   }
 
-  // Remove uma categoria, exceto "Outros".
   function removerCategoria(id) {
     const categoriaEncontrada = categorias.find(
       (categoria) => categoria.id === id

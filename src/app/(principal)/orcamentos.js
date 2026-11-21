@@ -34,12 +34,10 @@ export default function Orcamentos() {
   const [limite, setLimite] = useState('');
   const [orcamentoEditando, setOrcamentoEditando] = useState(null);
 
-  //Filtra as categorias de despesa
   const categoriasDespesa = categorias.filter(
     (categoria) => categoria.tipo === 'Despesa'
   );
 
-  //gastos do mês por categoria
   const gastosPorCategoria = useMemo(() => {
     const gastos = {};
     const hoje = new Date();
@@ -65,13 +63,11 @@ export default function Orcamentos() {
     return gastos;
   }, [transacoes]);
 
-  //limites de todos os orçamentos
   const totalLimites = orcamentos.reduce(
     (total, item) => total + Number(item.limite || 0),
     0
   );
 
-  //os gastos das categorias
   const totalGastos = orcamentos.reduce(
     (total, item) =>
       total + (gastosPorCategoria[item.categoria] || 0),

@@ -1,4 +1,3 @@
-
 import React, {
   createContext,
   useContext,
@@ -16,7 +15,6 @@ export function OrcamentosProvider({ children }) {
   const [orcamentos, setOrcamentos] = useState([]);
   const [carregado, setCarregado] = useState(false);
 
-  // Recupera os orçamentos salvos.
   useEffect(() => {
     async function carregarOrcamentos() {
       try {
@@ -25,10 +23,15 @@ export function OrcamentosProvider({ children }) {
         );
 
         if (dadosSalvos !== null) {
-          setOrcamentos(JSON.parse(dadosSalvos));
+          const dados = JSON.parse(dadosSalvos);
+
+          setOrcamentos(
+            Array.isArray(dados) ? dados : []
+          );
         }
       } catch (error) {
         console.error('Erro ao carregar orçamentos:', error);
+        setOrcamentos([]);
       } finally {
         setCarregado(true);
       }
@@ -37,7 +40,6 @@ export function OrcamentosProvider({ children }) {
     carregarOrcamentos();
   }, []);
 
-  // Salva automaticamente as alterações.
   useEffect(() => {
     async function salvarOrcamentos() {
       try {
@@ -61,7 +63,10 @@ export function OrcamentosProvider({ children }) {
       ...novoOrcamento,
     };
 
-    setOrcamentos((anteriores) => [...anteriores, orcamento]);
+    setOrcamentos((anteriores) => [
+      ...anteriores,
+      orcamento,
+    ]);
 
     return orcamento;
   }
@@ -69,7 +74,9 @@ export function OrcamentosProvider({ children }) {
   function editarOrcamento(id, dadosAtualizados) {
     setOrcamentos((anteriores) =>
       anteriores.map((item) =>
-        item.id === id ? { ...item, ...dadosAtualizados } : item
+        item.id === id
+          ? { ...item, ...dadosAtualizados }
+          : item
       )
     );
   }
@@ -84,6 +91,7 @@ export function OrcamentosProvider({ children }) {
     <OrcamentosContext.Provider
       value={{
         orcamentos,
+        carregado,
         adicionarOrcamento,
         editarOrcamento,
         excluirOrcamento,
